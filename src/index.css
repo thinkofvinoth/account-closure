@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --animation-duration: 0.2s;
+    --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Theme transition */
+  * {
+    @apply transition-colors duration-300;
+  }
+
+  /* Scrollbar Styles */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.400/50') theme('colors.gray.100/50');
+  }
+
+  .dark * {
+    scrollbar-color: theme('colors.gray.600/50') theme('colors.gray.800/50');
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    @apply h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100/50 dark:bg-gray-800/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400/50 dark:bg-gray-600/50 
+           rounded-full 
+           border-4 border-solid border-transparent
+           bg-clip-padding
+           backdrop-filter backdrop-blur-sm;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500/60 dark:bg-gray-500/60;
+  }
+
+  ::-webkit-scrollbar-corner {
+    @apply bg-transparent;
+  }
+
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 dark:bg-gray-900/80 
+           backdrop-blur-lg 
+           border border-white/20 dark:border-white/10
+           shadow-xl
+           transition-all duration-300;
+  }
+
+  .glass-input {
+    @apply bg-white/60 dark:bg-gray-800/60
+           backdrop-blur-sm
+           border border-white/20 dark:border-white/10
+           focus:border-dark-accent/50 dark:focus:border-dark-accent/50
+           focus:ring-2 focus:ring-dark-accent/20 dark:focus:ring-dark-accent/20
+           transition-all duration-300;
+  }
+
+  .gradient-button {
+    @apply bg-gradient-to-r from-dark-accent to-dark-accent2
+           hover:from-dark-accent2 hover:to-dark-accent
+           transition-all duration-300
+           transform hover:scale-105
+           active:scale-95;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) }
+  100% { transform: translateX(100%) }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s var(--animation-timing);
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s var(--animation-timing);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Transitions */
+.transition-all {
+  transition: all var(--animation-duration) var(--animation-timing);
+}
+
+/* Background Patterns */
+.bg-dot-pattern {
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-mesh-pattern {
+  background-image: linear-gradient(to right, currentColor 1px, transparent 1px),
+                    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-noise-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Loading States */
+.skeleton {
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+}
+
+/* Chat Container Specific */
+.chat-container {
+  @apply overflow-y-auto;
+  scrollbar-gutter: stable;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  ::-webkit-scrollbar {
+    @apply w-1;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    @apply h-1;
+  }
+}
