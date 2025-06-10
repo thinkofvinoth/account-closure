@@ -27,47 +27,69 @@ const CLOSURE_STEPS = [
   },
 ];
 
-const StepIcon = ({ step, currentStep, isCompleted }) => {
-  const Icon = step.icon;
-  
-  const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    purple: 'from-purple-500 to-purple-600',
-    green: 'from-green-500 to-green-600'
-  };
-  
-  if (isCompleted) {
-    return (
-      <motion.div 
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 200 }}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-lg"
-      >
-        <CheckCircle className="h-7 w-7 text-white" />
-      </motion.div>
-    );
-  }
-  
-  if (currentStep === step.id) {
-    return (
-      <motion.div 
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br ${colorClasses[step.color]} shadow-lg`}
-      >
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="h-7 w-7 rounded-full border-3 border-white border-t-transparent"
-        />
-      </motion.div>
-    );
-  }
+const StepIndicator = ({ step, index, currentStepIndex, completedSteps }) => {
+  const isCompleted = completedSteps.includes(step.id);
+  const isCurrent = currentStepIndex === index;
+  const isUpcoming = index > currentStepIndex;
   
   return (
-    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 shadow-md">
-      <Icon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+    <div className="flex items-center">
+      {/* Step Circle */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: index * 0.1 }}
+        className={cn(
+          "relative flex h-12 w-12 items-center justify-center rounded-full border-4 transition-all duration-500",
+          isCompleted && "bg-blue-500 border-blue-500",
+          isCurrent && "bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30",
+          isUpcoming && "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+        )}
+      >
+        {isCompleted ? (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <CheckCircle className="h-6 w-6 text-white" />
+          </motion.div>
+        ) : isCurrent ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="h-6 w-6 text-white font-bold flex items-center justify-center"
+          >
+            {index + 1}
+          </motion.div>
+        ) : (
+          <span className={cn(
+            "text-lg font-bold",
+            isUpcoming ? "text-gray-400 dark:text-gray-500" : "text-white"
+          )}>
+            {index + 1}
+          </span>
+        )}
+      </motion.div>
+
+      {/* Connecting Line */}
+      {index < CLOSURE_STEPS.length - 1 && (
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ delay: index * 0.2 + 0.3, duration: 0.5 }}
+          className="flex-1 h-1 mx-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+        >
+          <motion.div
+            initial={{ width: "0%" }}
+            animate={{ 
+              width: isCompleted ? "100%" : isCurrent ? "50%" : "0%" 
+            }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="h-full bg-blue-500 rounded-full"
+          />
+        </motion.div>
+      )}
     </div>
   );
 };
@@ -77,17 +99,22 @@ const ProgressBar = ({ currentStepIndex, totalSteps }) => {
   
   return (
     <div className="mb-8">
-      <div className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+      <div className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
         <span>Closure Progress</span>
         <span>{Math.round(progress)}% Complete</span>
       </div>
-      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
-        <motion.div
-          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 shadow-sm"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-        />
+      
+      {/* Step Indicators */}
+      <div className="flex items-center justify-between mb-6">
+        {CLOSURE_STEPS.map((step, index) => (
+          <StepIndicator
+            key={step.id}
+            step={step}
+            index={index}
+            currentStepIndex={currentStepIndex}
+            completedSteps={[]} // Will be updated based on actual completion
+          />
+        ))}
       </div>
     </div>
   );
@@ -178,11 +205,14 @@ export const AccountClosureFlow = ({ closureData, onComplete, isLoading }) => {
 
       <ProgressBar currentStepIndex={currentStepIndex} totalSteps={CLOSURE_STEPS.length} />
 
-      {/* Steps */}
+      {/* Current Step Details */}
       <div className="space-y-6">
         {CLOSURE_STEPS.map((step, index) => {
           const isCompleted = completedSteps.includes(step.id);
           const isCurrent = currentStep === step.id;
+          const Icon = step.icon;
+          
+          if (!isCurrent && !isCompleted) return null;
           
           return (
             <motion.div
@@ -193,43 +223,39 @@ export const AccountClosureFlow = ({ closureData, onComplete, isLoading }) => {
               className={cn(
                 "flex items-center space-x-4 p-4 rounded-xl transition-all duration-500 border",
                 isCurrent && "bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-900/30 dark:to-purple-900/30 border-blue-200 dark:border-blue-700 shadow-md",
-                isCompleted && "bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-700 shadow-md",
-                !isCompleted && !isCurrent && "bg-white/20 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700"
+                isCompleted && "bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-700 shadow-md"
               )}
             >
-              <StepIcon step={step} currentStep={currentStep} isCompleted={isCompleted} />
+              <div className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full",
+                isCompleted && "bg-green-500",
+                isCurrent && "bg-blue-500"
+              )}>
+                {isCompleted ? (
+                  <CheckCircle className="h-6 w-6 text-white" />
+                ) : (
+                  <Icon className="h-6 w-6 text-white" />
+                )}
+              </div>
               
               <div className="flex-1">
                 <h4 className={cn(
                   "font-semibold text-lg",
                   isCompleted && "text-green-700 dark:text-green-300",
-                  isCurrent && "text-blue-700 dark:text-blue-300",
-                  !isCompleted && !isCurrent && "text-gray-700 dark:text-gray-300"
+                  isCurrent && "text-blue-700 dark:text-blue-300"
                 )}>
                   {step.title}
                 </h4>
                 <p className={cn(
                   "text-sm mt-1",
                   isCompleted && "text-green-600 dark:text-green-400",
-                  isCurrent && "text-blue-600 dark:text-blue-400",
-                  !isCompleted && !isCurrent && "text-gray-500 dark:text-gray-400"
+                  isCurrent && "text-blue-600 dark:text-blue-400"
                 )}>
                   {step.description}
                 </p>
               </div>
 
               <div className="flex items-center">
-                {isCompleted && (
-                  <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 200 }}
-                    className="text-green-500"
-                  >
-                    <CheckCircle className="h-6 w-6" />
-                  </motion.div>
-                )}
-                
                 {isCurrent && (
                   <motion.div
                     animate={{ rotate: 360 }}

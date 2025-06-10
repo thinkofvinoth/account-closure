@@ -141,23 +141,34 @@ function App() {
 
           <div className="mt-8 p-6 bg-white/10 dark:bg-gray-800/20 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              🚀 Try Account Closure Workflow
+              🚀 Account Closure Workflow
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Type <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 rounded font-mono text-sm">"close my account"</span> to see the interactive workflow with typewriter effect.
+              Type <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 rounded font-mono text-sm">"close my account"</span> to start the interactive account closure process.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="bg-white/20 dark:bg-gray-700/30 p-3 rounded-lg border border-white/10">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200">🔐 Step 1</h4>
-                <p className="text-gray-600 dark:text-gray-400">Identity Verification</p>
+                <p className="text-gray-600 dark:text-gray-400">Account Verification</p>
               </div>
               <div className="bg-white/20 dark:bg-gray-700/30 p-3 rounded-lg border border-white/10">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200">💳 Step 2</h4>
-                <p className="text-gray-600 dark:text-gray-400">Account Settlement</p>
+                <p className="text-gray-600 dark:text-gray-400">Balance Validation</p>
               </div>
               <div className="bg-white/20 dark:bg-gray-700/30 p-3 rounded-lg border border-white/10">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200">✅ Step 3</h4>
-                <p className="text-gray-600 dark:text-gray-400">Account Closure</p>
+                <p className="text-gray-600 dark:text-gray-400">Secure Closure</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-amber-50/50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
+              <h4 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-2">
+                Test Scenarios:
+              </h4>
+              <div className="space-y-1 text-xs text-amber-700 dark:text-amber-300">
+                <div>• Valid accounts: 123456789012, 987654321098, 555666777888</div>
+                <div>• Outstanding balance: 111222333444</div>
+                <div>• Pending transactions: 999888777666</div>
               </div>
             </div>
           </div>

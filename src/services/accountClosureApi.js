@@ -36,6 +36,29 @@ export const accountClosureApi = {
         lastActivity: '2024-01-13',
         customerName: 'ABC Corp',
         eligible: true
+      },
+      // Test accounts with issues
+      '111222333444': {
+        accountNumber: '111222333444',
+        maskedNumber: '****-****-3444',
+        accountType: 'Savings Account',
+        balance: '$150.00',
+        status: 'Active',
+        lastActivity: '2024-01-16',
+        customerName: 'Test User',
+        eligible: false,
+        issue: 'Outstanding balance'
+      },
+      '999888777666': {
+        accountNumber: '999888777666',
+        maskedNumber: '****-****-7666',
+        accountType: 'Checking Account',
+        balance: '$0.00',
+        status: 'Pending',
+        lastActivity: '2024-01-16',
+        customerName: 'Test User 2',
+        eligible: false,
+        issue: 'Pending transactions'
       }
     };
     
