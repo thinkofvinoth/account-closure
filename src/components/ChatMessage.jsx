@@ -145,13 +145,13 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
           </div>
         </div>
 
-        {/* Show Account Closure Component for specific messages - positioned better */}
+        {/* Show Account Closure Component for specific messages - positioned inline */}
         {shouldShowAccountClosure && typewriterComplete && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-3"
+            className="mt-2"
           >
             <AccountClosureMessage onComplete={() => console.log('Account closure completed')} />
           </motion.div>
