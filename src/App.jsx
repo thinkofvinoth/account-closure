@@ -3,7 +3,6 @@ import { MessageCircle } from 'lucide-react';
 import { EmbeddedChat } from './components/EmbeddedChat';
 import { Header } from './components/Header';
 import { ChatContainer } from './components/ChatContainer';
-import { ConversationalAccountClosure } from './components/ConversationalAccountClosure';
 import { useThemeStore } from './store/useThemeStore';
 
 const initialMessages = [
@@ -35,31 +34,6 @@ const userProfile = {
 function App() {
   const { isDarkMode } = useThemeStore();
   const [mainMessages, setMainMessages] = useState(initialMessages);
-  const [isAccountClosureActive, setIsAccountClosureActive] = useState(false);
-  const [accountClosureComponent, setAccountClosureComponent] = useState(null);
-
-  const addBotMessage = async (content, type = null) => {
-    const botMessage = {
-      id: Date.now().toString(),
-      content,
-      type,
-      sender: {
-        id: 'bot',
-        name: 'AI Assistant',
-        avatar: '',
-        status: 'online'
-      },
-      timestamp: new Date(),
-      read: true,
-      reactions: [],
-      attachments: [],
-      edited: false,
-      typewriterComplete: false,
-    };
-    
-    setMainMessages((prev) => [...prev, botMessage]);
-    return new Promise(resolve => setTimeout(resolve, 100));
-  };
 
   const handleMainChatMessage = async (content) => {
     const newMessage = {
@@ -75,48 +49,30 @@ function App() {
 
     setMainMessages((prev) => [...prev, newMessage]);
 
-    // Check if user is asking about account closure
-    if (content.toLowerCase().includes('close') && content.toLowerCase().includes('account')) {
-      setIsAccountClosureActive(true);
-      await addBotMessage("I'll help you close your account. Let me guide you through the secure process step by step.", 'account_closure_start');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await addBotMessage("Please enter your account number to begin the closure process.");
+    setTimeout(() => {
+      const botResponse = {
+        id: (Date.now() + 1).toString(),
+        content: `I received your message: "${content}". How can I help you further?`,
+        sender: {
+          id: 'bot',
+          name: 'AI Assistant',
+          avatar: '',
+          status: 'online'
+        },
+        timestamp: new Date(),
+        read: true,
+        reactions: [],
+        attachments: [],
+        edited: false,
+        typewriterComplete: false, // Enable typewriter effect
+      };
       
-      // Create and set the conversational component
-      setAccountClosureComponent(
-        <ConversationalAccountClosure
-          onComplete={handleAccountClosureComplete}
-          onSendMessage={handleAccountClosureMessage}
-        />
-      );
-    } else if (isAccountClosureActive) {
-      // If account closure is active, let the ConversationalAccountClosure component handle it
-      // The component will process the input through its internal logic
-      return;
-    } else {
-      // Regular chat response
-      setTimeout(async () => {
-        await addBotMessage(`I received your message: "${content}". How can I help you further? You can also ask me about account closure if needed.`);
-      }, 1000);
-    }
-  };
-
-  const handleAccountClosureMessage = async (message) => {
-    await addBotMessage(message);
-  };
-
-  const handleAccountClosureComplete = () => {
-    setIsAccountClosureActive(false);
-    setAccountClosureComponent(null);
+      setMainMessages((prev) => [...prev, botResponse]);
+    }, 1000);
   };
 
   const handleEmbeddedChatMessage = async (message) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (message.toLowerCase().includes('close') && message.toLowerCase().includes('account')) {
-      return "I can help you with account closure. Let me guide you through the secure process step by step.";
-    }
-    
     return `I received your message: "${message}". How can I help you further?`;
   };
 
@@ -136,42 +92,23 @@ function App() {
               CSW Genie
             </h1>
             <p className={`mt-2 text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Experience our advanced chat interface with conversational account closure workflow
+              Experience our advanced chat interface
             </p>
           </div>
 
           <div className={`rounded-2xl backdrop-blur-lg border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white/20'} shadow-2xl overflow-hidden`}>
             <Header
-              title="Account Closure Assistant"
-              subtitle="Secure conversational account closure process"
+              title="Main Chat Interface"
+              subtitle="Full-featured chat experience"
               theme={{
                 primaryColor: 'from-dark-accent to-dark-accent2',
                 secondaryColor: 'from-dark-accent2 to-dark-accent',
               }}
             />
-            <div className="relative">
-              <ChatContainer
-                messages={mainMessages}
-                onSendMessage={handleMainChatMessage}
-              />
-              
-              {/* Render the conversational account closure component when active */}
-              {isAccountClosureActive && accountClosureComponent && (
-                <div className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-10 p-4 overflow-y-auto">
-                  <div className="max-w-2xl mx-auto">
-                    <div className="mb-4 text-center">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Account Closure Process
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Follow the steps below to complete your account closure
-                      </p>
-                    </div>
-                    {accountClosureComponent}
-                  </div>
-                </div>
-              )}
-            </div>
+            <ChatContainer
+              messages={mainMessages}
+              onSendMessage={handleMainChatMessage}
+            />
           </div>
         </div>
       </div>

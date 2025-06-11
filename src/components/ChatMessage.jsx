@@ -4,7 +4,6 @@ import { Bot, ThumbsUp, ThumbsDown, Share2, User, Clock, MoreHorizontal } from '
 import { format } from 'date-fns';
 import { cn } from '../utils/cn';
 import { Spinner } from './Spinner';
-import { AccountClosureMessage } from './AccountClosureMessage';
 import { TypewriterText } from './TypewriterText';
 
 const MessageSkeleton = () => (
@@ -99,10 +98,6 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
     setShowTypewriter(false);
   };
 
-  // Check if this message should show the account closure workflow
-  const shouldShowAccountClosure = message.type === 'account_closure' || 
-    (isBot && message.content.toLowerCase().includes('account closure'));
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -144,18 +139,6 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
             )}
           </div>
         </div>
-
-        {/* Show Account Closure Component for specific messages - positioned inline */}
-        {shouldShowAccountClosure && typewriterComplete && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-2"
-          >
-            <AccountClosureMessage onComplete={() => console.log('Account closure completed')} />
-          </motion.div>
-        )}
 
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
