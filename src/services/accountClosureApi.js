@@ -167,6 +167,19 @@ export const accountClosureApi = {
   }
 };
 
+// Mock closure scenarios for different timing simulations
+export const mockClosureScenarios = {
+  successful: {
+    stepDurations: [2000, 1500, 1800, 1000, 2500, 1200]
+  },
+  quick: {
+    stepDurations: [500, 400, 600, 300, 800, 400]
+  },
+  withDelay: {
+    stepDurations: [3000, 2500, 3000, 1500, 4000, 2000]
+  }
+};
+
 // Closure reasons options
 export const closureReasons = [
   { id: 'no_longer_needed', label: 'No longer needed', value: 'no_longer_needed' },
