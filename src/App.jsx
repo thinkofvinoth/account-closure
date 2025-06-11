@@ -144,15 +144,7 @@ function App() {
                 onSendMessage={handleMainChatMessage}
               />
               
-              {/* Overlay Account Closure Component when active */}
-              {isAccountClosureActive && (
-                <div className="absolute bottom-20 left-4 right-4 z-10">
-                  <ConversationalAccountClosure
-                    onComplete={handleAccountClosureComplete}
-                    onSendMessage={handleAccountClosureMessage}
-                  />
-                </div>
-              )}
+         
             </div>
           </div>
         </div>
