@@ -1,12 +1,13 @@
-// Mock API service for account closure
+// Enhanced Mock API service for account closure with comprehensive scenarios
 export const accountClosureApi = {
-  // Simulate account verification
+  // Simulate account verification with detailed validation
   verifyAccount: async (accountNumber) => {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Mock account database
+    // Enhanced mock account database with various scenarios
     const accounts = {
+      // Valid accounts - ready for closure
       '123456789012': {
         accountNumber: '123456789012',
         maskedNumber: '****-****-9012',
@@ -15,7 +16,10 @@ export const accountClosureApi = {
         status: 'Active',
         lastActivity: '2024-01-15',
         customerName: 'John Doe',
-        eligible: true
+        eligible: true,
+        hasOutstandingPayments: false,
+        hasRecurringPayments: false,
+        isBlocked: false
       },
       '987654321098': {
         accountNumber: '987654321098',
@@ -25,7 +29,10 @@ export const accountClosureApi = {
         status: 'Active',
         lastActivity: '2024-01-14',
         customerName: 'Jane Smith',
-        eligible: true
+        eligible: true,
+        hasOutstandingPayments: false,
+        hasRecurringPayments: false,
+        isBlocked: false
       },
       '555666777888': {
         accountNumber: '555666777888',
@@ -35,9 +42,13 @@ export const accountClosureApi = {
         status: 'Active',
         lastActivity: '2024-01-13',
         customerName: 'ABC Corp',
-        eligible: true
+        eligible: true,
+        hasOutstandingPayments: false,
+        hasRecurringPayments: false,
+        isBlocked: false
       },
-      // Test accounts with issues
+      
+      // Problem accounts - various issues
       '111222333444': {
         accountNumber: '111222333444',
         maskedNumber: '****-****-3444',
@@ -47,18 +58,55 @@ export const accountClosureApi = {
         lastActivity: '2024-01-16',
         customerName: 'Test User',
         eligible: false,
-        issue: 'Outstanding balance'
+        hasOutstandingPayments: true,
+        hasRecurringPayments: false,
+        isBlocked: false,
+        issues: ['Outstanding balance of $150.00']
       },
       '999888777666': {
         accountNumber: '999888777666',
         maskedNumber: '****-****-7666',
         accountType: 'Checking Account',
         balance: '$0.00',
-        status: 'Pending',
+        status: 'Active',
         lastActivity: '2024-01-16',
         customerName: 'Test User 2',
         eligible: false,
-        issue: 'Pending transactions'
+        hasOutstandingPayments: false,
+        hasRecurringPayments: true,
+        isBlocked: false,
+        issues: ['Active recurring payments (Netflix, Spotify)']
+      },
+      '444555666777': {
+        accountNumber: '444555666777',
+        maskedNumber: '****-****-6777',
+        accountType: 'Savings Account',
+        balance: '$0.00',
+        status: 'Blocked',
+        lastActivity: '2024-01-10',
+        customerName: 'Blocked User',
+        eligible: false,
+        hasOutstandingPayments: false,
+        hasRecurringPayments: false,
+        isBlocked: true,
+        issues: ['Account is blocked/inactive']
+      },
+      '333444555666': {
+        accountNumber: '333444555666',
+        maskedNumber: '****-****-5666',
+        accountType: 'Checking Account',
+        balance: '$25.50',
+        status: 'Active',
+        lastActivity: '2024-01-16',
+        customerName: 'Multiple Issues User',
+        eligible: false,
+        hasOutstandingPayments: true,
+        hasRecurringPayments: true,
+        isBlocked: false,
+        issues: [
+          'Outstanding balance of $25.50',
+          'Active recurring payments (Gym membership, Insurance)'
+        ]
       }
     };
     
@@ -73,101 +121,56 @@ export const accountClosureApi = {
     };
   },
 
-  // Simulate account closure initiation
-  initiateAccountClosure: async (accountNumber, reason) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  // Validate account number format
+  validateAccountFormat: (accountNumber) => {
+    const cleaned = accountNumber.replace(/\D/g, '');
     
-    // Mock response
+    if (cleaned.length === 0) {
+      return { valid: false, error: 'Please enter an account number.' };
+    }
+    
+    if (cleaned.length < 12) {
+      return { valid: false, error: 'Account number must be at least 12 digits.' };
+    }
+    
+    if (cleaned.length > 16) {
+      return { valid: false, error: 'Account number cannot exceed 16 digits.' };
+    }
+    
+    if (!/^\d+$/.test(cleaned)) {
+      return { valid: false, error: 'Account number should contain only digits.' };
+    }
+    
+    return { valid: true, cleaned };
+  },
+
+  // Simulate account closure process with 6 steps
+  processAccountClosure: async (accountNumber, reason) => {
+    const steps = [
+      { id: 1, name: 'Verifying account information', duration: 2000 },
+      { id: 2, name: 'Checking outstanding payments', duration: 1500 },
+      { id: 3, name: 'Validating recurring payments', duration: 1800 },
+      { id: 4, name: 'Recording closure reason', duration: 1000 },
+      { id: 5, name: 'Initiating closure process', duration: 2500 },
+      { id: 6, name: 'Generating closure ID', duration: 1200 }
+    ];
+
+    const closureId = `CSW-${Math.floor(Math.random() * 9000) + 1000}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+    
     return {
       success: true,
-      closureId: `CLS_${Date.now()}`,
-      estimatedTime: '5-7 minutes',
-      steps: [
-        {
-          id: 'verification',
-          name: 'Identity Verification',
-          status: 'pending',
-          estimatedDuration: 2000
-        },
-        {
-          id: 'settlement',
-          name: 'Account Settlement',
-          status: 'pending',
-          estimatedDuration: 3000
-        },
-        {
-          id: 'completion',
-          name: 'Account Closure',
-          status: 'pending',
-          estimatedDuration: 2000
-        }
-      ],
-      stepDurations: [2000, 3000, 2000], // milliseconds for each step
+      closureId,
+      steps,
+      totalDuration: steps.reduce((sum, step) => sum + step.duration, 0),
       reason
     };
-  },
-
-  // Simulate checking closure eligibility
-  checkClosureEligibility: async (accountNumber) => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    return {
-      eligible: true,
-      requirements: [
-        { id: 'balance', name: 'Zero balance', status: 'completed' },
-        { id: 'pending', name: 'No pending transactions', status: 'completed' },
-        { id: 'documents', name: 'All documents submitted', status: 'completed' }
-      ],
-      warnings: [
-        'Account closure is permanent and cannot be undone',
-        'You will lose access to online banking services',
-        'Any automatic payments will be cancelled'
-      ]
-    };
-  },
-
-  // Simulate getting closure status
-  getClosureStatus: async (closureId) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return {
-      closureId,
-      status: 'in_progress',
-      currentStep: 'verification',
-      completedSteps: [],
-      estimatedCompletion: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
-      lastUpdated: new Date()
-    };
   }
 };
 
-// Mock data for different scenarios
-export const mockClosureScenarios = {
-  successful: {
-    stepDurations: [2000, 3000, 2000],
-    accountDetails: {
-      accountNumber: '****1234',
-      accountType: 'Savings Account',
-      balance: '$0.00'
-    }
-  },
-  
-  withDelay: {
-    stepDurations: [3000, 5000, 3000],
-    accountDetails: {
-      accountNumber: '****5678',
-      accountType: 'Checking Account',
-      balance: '$0.00'
-    }
-  },
-  
-  quick: {
-    stepDurations: [1000, 1500, 1000],
-    accountDetails: {
-      accountNumber: '****9012',
-      accountType: 'Business Account',
-      balance: '$0.00'
-    }
-  }
-};
+// Closure reasons options
+export const closureReasons = [
+  { id: 'no_longer_needed', label: 'No longer needed', value: 'no_longer_needed' },
+  { id: 'high_fees', label: 'High fees', value: 'high_fees' },
+  { id: 'switching_competitor', label: 'Switching to competitor', value: 'switching_competitor' },
+  { id: 'other', label: 'Other', value: 'other', allowCustom: true }
+];

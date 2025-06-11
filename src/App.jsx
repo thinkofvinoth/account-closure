@@ -3,6 +3,7 @@ import { MessageCircle } from 'lucide-react';
 import { EmbeddedChat } from './components/EmbeddedChat';
 import { Header } from './components/Header';
 import { ChatContainer } from './components/ChatContainer';
+import { ConversationalAccountClosure } from './components/ConversationalAccountClosure';
 import { useThemeStore } from './store/useThemeStore';
 
 const initialMessages = [
@@ -34,6 +35,30 @@ const userProfile = {
 function App() {
   const { isDarkMode } = useThemeStore();
   const [mainMessages, setMainMessages] = useState(initialMessages);
+  const [isAccountClosureActive, setIsAccountClosureActive] = useState(false);
+
+  const addBotMessage = async (content, type = null) => {
+    const botMessage = {
+      id: Date.now().toString(),
+      content,
+      type,
+      sender: {
+        id: 'bot',
+        name: 'AI Assistant',
+        avatar: '',
+        status: 'online'
+      },
+      timestamp: new Date(),
+      read: true,
+      reactions: [],
+      attachments: [],
+      edited: false,
+      typewriterComplete: false,
+    };
+    
+    setMainMessages((prev) => [...prev, botMessage]);
+    return new Promise(resolve => setTimeout(resolve, 100));
+  };
 
   const handleMainChatMessage = async (content) => {
     const newMessage = {
@@ -49,49 +74,29 @@ function App() {
 
     setMainMessages((prev) => [...prev, newMessage]);
 
-    setTimeout(() => {
-      let botResponse;
-      
-      // Check if user is asking about account closure
-      if (content.toLowerCase().includes('close') && content.toLowerCase().includes('account')) {
-        botResponse = {
-          id: (Date.now() + 1).toString(),
-          content: "I can help you with account closure. Let me guide you through the secure process step by step.",
-          type: 'account_closure',
-          sender: {
-            id: 'bot',
-            name: 'AI Assistant',
-            avatar: '',
-            status: 'online'
-          },
-          timestamp: new Date(),
-          read: true,
-          reactions: [],
-          attachments: [],
-          edited: false,
-          typewriterComplete: false, // Enable typewriter effect
-        };
-      } else {
-        botResponse = {
-          id: (Date.now() + 1).toString(),
-          content: `I received your message: "${content}". How can I help you further? You can also ask me about account closure if needed.`,
-          sender: {
-            id: 'bot',
-            name: 'AI Assistant',
-            avatar: '',
-            status: 'online'
-          },
-          timestamp: new Date(),
-          read: true,
-          reactions: [],
-          attachments: [],
-          edited: false,
-          typewriterComplete: false, // Enable typewriter effect
-        };
-      }
-      
-      setMainMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+    // Check if user is asking about account closure
+    if (content.toLowerCase().includes('close') && content.toLowerCase().includes('account')) {
+      setIsAccountClosureActive(true);
+      await addBotMessage("I'll help you close your account. Let me guide you through the secure process step by step.", 'account_closure_start');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await addBotMessage("Please enter your account number to begin the closure process.");
+    } else if (isAccountClosureActive) {
+      // Handle account closure flow inputs
+      // This will be managed by the ConversationalAccountClosure component
+    } else {
+      // Regular chat response
+      setTimeout(async () => {
+        await addBotMessage(`I received your message: "${content}". How can I help you further? You can also ask me about account closure if needed.`);
+      }, 1000);
+    }
+  };
+
+  const handleAccountClosureMessage = async (message) => {
+    await addBotMessage(message);
+  };
+
+  const handleAccountClosureComplete = () => {
+    setIsAccountClosureActive(false);
   };
 
   const handleEmbeddedChatMessage = async (message) => {
@@ -120,26 +125,36 @@ function App() {
               CSW Genie
             </h1>
             <p className={`mt-2 text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Experience our advanced chat interface with account closure workflow
+              Experience our advanced chat interface with conversational account closure workflow
             </p>
           </div>
 
           <div className={`rounded-2xl backdrop-blur-lg border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white/20'} shadow-2xl overflow-hidden`}>
             <Header
-              title="Main Chat Interface"
-              subtitle="Full-featured chat experience with account closure"
+              title="Account Closure Assistant"
+              subtitle="Secure conversational account closure process"
               theme={{
                 primaryColor: 'from-dark-accent to-dark-accent2',
                 secondaryColor: 'from-dark-accent2 to-dark-accent',
               }}
             />
-            <ChatContainer
-              messages={mainMessages}
-              onSendMessage={handleMainChatMessage}
-            />
+            <div className="relative">
+              <ChatContainer
+                messages={mainMessages}
+                onSendMessage={handleMainChatMessage}
+              />
+              
+              {/* Overlay Account Closure Component when active */}
+              {isAccountClosureActive && (
+                <div className="absolute bottom-20 left-4 right-4 z-10">
+                  <ConversationalAccountClosure
+                    onComplete={handleAccountClosureComplete}
+                    onSendMessage={handleAccountClosureMessage}
+                  />
+                </div>
+              )}
+            </div>
           </div>
-
- 
         </div>
       </div>
 
