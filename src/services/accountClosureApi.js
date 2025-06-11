@@ -144,6 +144,21 @@ export const accountClosureApi = {
     return { valid: true, cleaned };
   },
 
+  // Initiate account closure process
+  initiateAccountClosure: async (accountNumber, reason) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const closureId = `CSW-${Math.floor(Math.random() * 9000) + 1000}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+    
+    return {
+      success: true,
+      closureId,
+      reason,
+      initiatedAt: new Date().toISOString()
+    };
+  },
+
   // Simulate account closure process with 6 steps
   processAccountClosure: async (accountNumber, reason) => {
     const steps = [
@@ -167,16 +182,22 @@ export const accountClosureApi = {
   }
 };
 
-// Mock closure scenarios for different timing simulations
+// Mock closure scenarios for different account types
 export const mockClosureScenarios = {
   successful: {
-    stepDurations: [2000, 1500, 1800, 1000, 2500, 1200]
-  },
-  quick: {
-    stepDurations: [500, 400, 600, 300, 800, 400]
+    stepDurations: [2000, 1500, 1000], // 3 steps with different durations
+    status: 'success',
+    message: 'Account closure completed successfully'
   },
   withDelay: {
-    stepDurations: [3000, 2500, 3000, 1500, 4000, 2000]
+    stepDurations: [3000, 2500, 2000], // Longer durations for business accounts
+    status: 'success',
+    message: 'Business account closure completed with additional verification'
+  },
+  quick: {
+    stepDurations: [1500, 1000, 800], // Faster for checking accounts
+    status: 'success',
+    message: 'Checking account closure completed quickly'
   }
 };
 
