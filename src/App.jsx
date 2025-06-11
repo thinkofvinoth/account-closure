@@ -172,10 +172,42 @@ function App() {
         </div>
       </div>
 
-      {/* Account Closure Overlay */}
+      {/* Theme-Cohesive Account Closure Overlay */}
       {showAccountClosure && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Multi-layered Background for Theme Cohesion */}
+          <div className="absolute inset-0">
+            {/* Base gradient matching main theme */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${
+              isDarkMode 
+                ? 'from-gray-900/95 via-gray-800/90 to-gray-900/95' 
+                : 'from-blue-50/95 via-indigo-50/90 to-purple-50/95'
+            }`} />
+            
+            {/* Radial gradient for depth */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.15)_0%,_transparent_70%)]" />
+            
+            {/* Noise texture for premium feel */}
+            <div className={`absolute inset-0 opacity-30 ${
+              isDarkMode ? 'bg-noise-pattern' : 'bg-dot-pattern'
+            }`} style={{ 
+              backgroundSize: '24px 24px',
+              color: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'
+            }} />
+            
+            {/* Advanced backdrop blur */}
+            <div className="absolute inset-0 backdrop-blur-xl" />
+            
+            {/* Subtle border glow */}
+            <div className={`absolute inset-0 ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-transparent via-blue-500/5 to-transparent' 
+                : 'bg-gradient-to-r from-transparent via-indigo-500/10 to-transparent'
+            }`} />
+          </div>
+          
+          {/* Content Container */}
+          <div className="relative w-full max-w-2xl">
             <AccountClosureChatbot onComplete={handleAccountClosureComplete} />
           </div>
         </div>
