@@ -3,7 +3,6 @@ import { MessageCircle } from 'lucide-react';
 import { EmbeddedChat } from './components/EmbeddedChat';
 import { Header } from './components/Header';
 import { ChatContainer } from './components/ChatContainer';
-import { AccountClosureChatbot } from './components/AccountClosureChatbot';
 import { useThemeStore } from './store/useThemeStore';
 
 const initialMessages = [
@@ -35,7 +34,6 @@ const userProfile = {
 function App() {
   const { isDarkMode } = useThemeStore();
   const [mainMessages, setMainMessages] = useState(initialMessages);
-  const [showAccountClosure, setShowAccountClosure] = useState(false);
 
   const handleMainChatMessage = async (content) => {
     const newMessage = {
@@ -73,11 +71,6 @@ function App() {
           edited: false,
           typewriterComplete: false, // Enable typewriter effect
         };
-        
-        // Show account closure chatbot after a delay
-        setTimeout(() => {
-          setShowAccountClosure(true);
-        }, 2000);
       } else {
         botResponse = {
           id: (Date.now() + 1).toString(),
@@ -109,30 +102,6 @@ function App() {
     }
     
     return `I received your message: "${message}". How can I help you further?`;
-  };
-
-  const handleAccountClosureComplete = () => {
-    setShowAccountClosure(false);
-    
-    // Add completion message to chat
-    const completionMessage = {
-      id: Date.now().toString(),
-      content: "Account closure process completed successfully. Thank you for using our service!",
-      sender: {
-        id: 'bot',
-        name: 'AI Assistant',
-        avatar: '',
-        status: 'online'
-      },
-      timestamp: new Date(),
-      read: true,
-      reactions: [],
-      attachments: [],
-      edited: false,
-      typewriterComplete: false,
-    };
-    
-    setMainMessages((prev) => [...prev, completionMessage]);
   };
 
   return (
@@ -171,15 +140,6 @@ function App() {
           </div>
         </div>
       </div>
-
-      {/* Account Closure Overlay */}
-      {showAccountClosure && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl">
-            <AccountClosureChatbot onComplete={handleAccountClosureComplete} />
-          </div>
-        </div>
-      )}
 
       <EmbeddedChat
         initialMessages={initialMessages}

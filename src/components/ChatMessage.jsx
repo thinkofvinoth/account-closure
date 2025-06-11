@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { cn } from '../utils/cn';
 import { Spinner } from './Spinner';
 import { TypewriterText } from './TypewriterText';
+import { ConversationalAccountClosure } from './ConversationalAccountClosure';
 
 const MessageSkeleton = () => (
   <div className="flex gap-4">
@@ -64,7 +65,7 @@ const Avatar = ({ sender, size = 'default' }) => {
   );
 };
 
-export const ChatMessage = ({ message, isBot, isLoading }) => {
+export const ChatMessage = ({ message, isBot, isLoading, onSendMessage }) => {
   const [reaction, setReaction] = useState(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showTypewriter, setShowTypewriter] = useState(isBot && !message.typewriterComplete);
@@ -98,6 +99,10 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
     setShowTypewriter(false);
   };
 
+  // Check if this message should show the account closure workflow
+  const shouldShowAccountClosure = message.type === 'account_closure' || 
+    (isBot && message.content.toLowerCase().includes('account closure') && typewriterComplete);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -127,7 +132,7 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>
-          <div className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
+          <div className={`text-[15px] leading-relaxed whitespace-pre-line ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
             {isBot && showTypewriter ? (
               <TypewriterText 
                 text={message.content} 
@@ -139,6 +144,18 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
             )}
           </div>
         </div>
+
+        {/* Show Account Closure Component for specific messages - positioned inline */}
+        {shouldShowAccountClosure && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-2"
+          >
+            <ConversationalAccountClosure onSendMessage={onSendMessage} />
+          </motion.div>
+        )}
 
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
