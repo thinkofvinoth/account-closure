@@ -10,7 +10,8 @@ export const ChatContainer = ({ messages, onSendMessage }) => {
     try {
       setIsLoading(true);
       await onSendMessage(message);
-      await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2 seconds before sending
+          await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2 seconds before sending
+
     } finally {
       setIsLoading(false);
     }
@@ -33,7 +34,6 @@ export const ChatContainer = ({ messages, onSendMessage }) => {
                 message={item}
                 isBot={item.sender?.id === 'bot'}
                 isLoading={item.isLoading}
-                onSendMessage={handleSendMessage}
               />
             </div>
           )}
