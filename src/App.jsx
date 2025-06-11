@@ -36,6 +36,7 @@ function App() {
   const { isDarkMode } = useThemeStore();
   const [mainMessages, setMainMessages] = useState(initialMessages);
   const [isAccountClosureActive, setIsAccountClosureActive] = useState(false);
+  const [accountClosureComponent, setAccountClosureComponent] = useState(null);
 
   const addBotMessage = async (content, type = null) => {
     const botMessage = {
@@ -80,9 +81,18 @@ function App() {
       await addBotMessage("I'll help you close your account. Let me guide you through the secure process step by step.", 'account_closure_start');
       await new Promise(resolve => setTimeout(resolve, 1000));
       await addBotMessage("Please enter your account number to begin the closure process.");
+      
+      // Create and set the conversational component
+      setAccountClosureComponent(
+        <ConversationalAccountClosure
+          onComplete={handleAccountClosureComplete}
+          onSendMessage={handleAccountClosureMessage}
+        />
+      );
     } else if (isAccountClosureActive) {
-      // Handle account closure flow inputs
-      // This will be managed by the ConversationalAccountClosure component
+      // If account closure is active, let the ConversationalAccountClosure component handle it
+      // The component will process the input through its internal logic
+      return;
     } else {
       // Regular chat response
       setTimeout(async () => {
@@ -97,6 +107,7 @@ function App() {
 
   const handleAccountClosureComplete = () => {
     setIsAccountClosureActive(false);
+    setAccountClosureComponent(null);
   };
 
   const handleEmbeddedChatMessage = async (message) => {
@@ -144,7 +155,22 @@ function App() {
                 onSendMessage={handleMainChatMessage}
               />
               
-         
+              {/* Render the conversational account closure component when active */}
+              {isAccountClosureActive && accountClosureComponent && (
+                <div className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm z-10 p-4 overflow-y-auto">
+                  <div className="max-w-2xl mx-auto">
+                    <div className="mb-4 text-center">
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        Account Closure Process
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Follow the steps below to complete your account closure
+                      </p>
+                    </div>
+                    {accountClosureComponent}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
