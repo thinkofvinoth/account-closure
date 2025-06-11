@@ -134,7 +134,7 @@ const ProgressBar = ({ currentStep, completedSteps }) => {
 };
 
 export const AccountClosureChatbot = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState('initial');
+  const [currentStep, setCurrentStep] = useState('verification'); // Start directly with verification
   const [completedSteps, setCompletedSteps] = useState([]);
   const [accountNumber, setAccountNumber] = useState('');
   const [accountData, setAccountData] = useState(null);
@@ -225,60 +225,6 @@ export const AccountClosureChatbot = ({ onComplete }) => {
     setIsProcessing(false);
   };
 
-  const renderInitialGreeting = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
-    >
-      <div className="text-center mb-6">
-        <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-xl inline-block mb-4">
-          <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-          Account Closure Assistant
-        </h3>
-      </div>
-
-      <div className="bg-blue-50/50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800/50">
-        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-          Hello! I'm here to help you close your account. This process typically takes 5-7 minutes. 
-          Before we begin, please note that you'll need:
-        </p>
-        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <li className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>Your account number</span>
-          </li>
-          <li className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>No outstanding payments</span>
-          </li>
-          <li className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>No active recurring payments</span>
-          </li>
-        </ul>
-      </div>
-
-      <div className="flex space-x-3">
-        <button
-          onClick={() => onComplete?.()}
-          className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 font-medium"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => setCurrentStep('verification')}
-          className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium"
-        >
-          <span>Proceed</span>
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
-    </motion.div>
-  );
-
   const renderAccountVerification = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -288,11 +234,14 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
       
       <div className="text-center mb-4">
+        <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-xl inline-block mb-4">
+          <CreditCard className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+        </div>
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
           Account Verification
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Please enter your 12-digit account number.
+          Please enter your 12-digit account number to begin the closure process.
         </p>
       </div>
 
@@ -308,6 +257,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
           placeholder="12-3456-7890-12"
           className="w-full px-4 py-3 text-center font-mono text-lg rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/50 focus:outline-none transition-all"
           disabled={isProcessing}
+          autoFocus
         />
         
         {error && (
@@ -332,23 +282,31 @@ export const AccountClosureChatbot = ({ onComplete }) => {
         </div>
       </div>
 
-      <button
-        onClick={handleAccountNumberSubmit}
-        disabled={!validateAccountNumber(accountNumber) || isProcessing}
-        className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
-      >
-        {isProcessing ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Checking account status...</span>
-          </>
-        ) : (
-          <>
-            <span>Verify Account</span>
-            <ArrowRight className="h-4 w-4" />
-          </>
-        )}
-      </button>
+      <div className="flex space-x-3">
+        <button
+          onClick={() => onComplete?.()}
+          className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleAccountNumberSubmit}
+          disabled={!validateAccountNumber(accountNumber) || isProcessing}
+          className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Checking account status...</span>
+            </>
+          ) : (
+            <>
+              <span>Verify Account</span>
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
+      </div>
     </motion.div>
   );
 
@@ -371,7 +329,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
 
       <div className="bg-red-50/50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800/50">
         <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-          Unfortunately, we can't proceed because of the following reasons:
+          I've found the following that need attention before we can proceed:
         </p>
         <ul className="space-y-2 text-sm">
           {accountData?.status !== 'active' && (
@@ -397,14 +355,14 @@ export const AccountClosureChatbot = ({ onComplete }) => {
 
       <div className="bg-blue-50/50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800/50">
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          Please resolve the issues and try again. Would you like help with that?
+          Would you like assistance resolving these items?
         </p>
       </div>
 
       <div className="flex space-x-3">
         <button
           onClick={() => {
-            setCurrentStep('initial');
+            setCurrentStep('verification');
             setAccountNumber('');
             setAccountData(null);
             setCompletedSteps([]);
@@ -412,7 +370,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
           }}
           className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 font-medium"
         >
-          Start Over
+          Try Again
         </button>
         <button
           onClick={() => onComplete?.()}
@@ -640,7 +598,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
           <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
         </motion.div>
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-          🎉 Account Closure Complete!
+          ✅ Account Closure Complete!
         </h3>
       </div>
 
@@ -668,7 +626,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
 
       <div className="bg-gray-50/50 dark:bg-gray-800/30 rounded-xl p-4">
         <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-          Thank you for banking with us. Your feedback helps us improve. Goodbye!
+          Is there anything else you need assistance with?
         </p>
       </div>
 
@@ -684,7 +642,6 @@ export const AccountClosureChatbot = ({ onComplete }) => {
   return (
     <div className="bg-gradient-to-br from-white/30 to-white/20 dark:from-gray-800/70 dark:to-gray-900/50 backdrop-blur-xl border border-white/30 dark:border-white/20 rounded-xl p-5 shadow-xl max-w-lg mx-auto">
       <AnimatePresence mode="wait">
-        {currentStep === 'initial' && renderInitialGreeting()}
         {currentStep === 'verification' && renderAccountVerification()}
         {currentStep === 'status-issues' && renderStatusIssues()}
         {currentStep === 'reason' && renderClosureReason()}
