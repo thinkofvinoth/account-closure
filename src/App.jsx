@@ -172,9 +172,9 @@ function App() {
         </div>
       </div>
 
-      {/* Theme-Cohesive Account Closure Overlay */}
+      {/* Theme-Cohesive Account Closure Overlay - Lower z-index than embedded chat */}
       {showAccountClosure && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
           {/* Multi-layered Background for Theme Cohesion */}
           <div className="absolute inset-0">
             {/* Base gradient matching main theme */}
@@ -213,19 +213,22 @@ function App() {
         </div>
       )}
 
-      <EmbeddedChat
-        initialMessages={initialMessages}
-        position="bottom-right"
-        buttonIcon={<MessageCircle className="h-6 w-6" />}
-        title="Quick Assistant"
-        subtitle="Here to help you 24/7"
-        theme={{
-          primaryColor: 'from-dark-accent to-dark-accent2',
-          secondaryColor: 'from-dark-accent2 to-dark-accent',
-          buttonColor: 'from-dark-accent to-dark-accent2'
-        }}
-        onSendMessage={handleEmbeddedChatMessage}
-      />
+      {/* Embedded Chat with Higher z-index to stay above overlay */}
+      <div className="relative z-50">
+        <EmbeddedChat
+          initialMessages={initialMessages}
+          position="bottom-right"
+          buttonIcon={<MessageCircle className="h-6 w-6" />}
+          title="Quick Assistant"
+          subtitle="Here to help you 24/7"
+          theme={{
+            primaryColor: 'from-dark-accent to-dark-accent2',
+            secondaryColor: 'from-dark-accent2 to-dark-accent',
+            buttonColor: 'from-dark-accent to-dark-accent2'
+          }}
+          onSendMessage={handleEmbeddedChatMessage}
+        />
+      </div>
     </div>
   );
 }
