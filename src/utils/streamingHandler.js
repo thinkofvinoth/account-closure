@@ -13,7 +13,7 @@ export class ContentProcessor {
   detectContentType(content) {
     if (!content) return 'text';
     
-    // Check for HTML tags
+    // Check for HTML tags (including <p> tags)
     if (/<[^>]+>/.test(content)) {
       return 'html';
     }
@@ -39,11 +39,13 @@ export class ContentProcessor {
 
     switch (detectedType) {
       case 'html':
+        // Sanitize HTML content (including <p> tags)
         processedContent = htmlSanitizer.sanitize(content);
         isHtml = true;
         break;
       
       case 'markdown':
+        // Convert markdown to HTML and sanitize
         processedContent = markdownProcessor.toHtml(content);
         processedContent = htmlSanitizer.sanitize(processedContent);
         isHtml = true;
@@ -51,8 +53,14 @@ export class ContentProcessor {
       
       case 'text':
       default:
-        // Convert line breaks to HTML for consistent rendering
-        processedContent = content.replace(/\n/g, '<br>');
+        // Wrap plain text in <p> tags for consistent rendering
+        const lines = content.split('\n').filter(line => line.trim() !== '');
+        if (lines.length === 1) {
+          processedContent = `<p>${content}</p>`;
+        } else {
+          processedContent = lines.map(line => `<p>${line.trim()}</p>`).join('');
+        }
+        processedContent = htmlSanitizer.sanitize(processedContent);
         isHtml = true;
         break;
     }
@@ -79,6 +87,7 @@ export class StreamingHandler {
       timeout: 30000, // 30 seconds
       enableMarkdown: true,
       enableHtml: true,
+      preserveHtmlStructure: true, // Preserve HTML structure during streaming
       ...options
     };
     
@@ -124,7 +133,7 @@ export class StreamingHandler {
   }
 
   /**
-   * Process streaming chunks
+   * Process streaming chunks with HTML support
    * @private
    */
   async processStreamingChunks(streamState, onUpdate, onComplete, onError) {
@@ -135,7 +144,6 @@ export class StreamingHandler {
         if (!this.activeStreams.has(id)) break; // Stream was cancelled
         
         const chunk = chunks[chunkIndex];
-        const processedChunk = this.contentProcessor.processContent(chunk);
         
         // Add separator between chunks (except for first chunk)
         if (chunkIndex > 0) {
@@ -152,18 +160,18 @@ export class StreamingHandler {
           await this.delay(this.options.responseDelay);
         }
         
-        // Stream characters of current chunk
-        await this.streamChunkCharacters(
+        // Stream HTML content character by character while preserving structure
+        await this.streamHtmlContent(
           streamState, 
-          processedChunk.originalContent, 
+          chunk, 
           chunkIndex, 
           chunks.length, 
           onUpdate
         );
       }
       
-      // Streaming complete
-      const finalProcessedContent = this.contentProcessor.processContent(streamState.fullContent);
+      // Streaming complete - process final content
+      const finalProcessedContent = this.contentProcessor.processContent(streamState.fullContent, 'html');
       
       // Add to message history
       this.messageHistory.push({
@@ -194,24 +202,104 @@ export class StreamingHandler {
   }
 
   /**
-   * Stream individual characters of a chunk
+   * Stream HTML content while preserving structure
    * @private
    */
-  async streamChunkCharacters(streamState, chunkContent, chunkIndex, totalChunks, onUpdate) {
-    for (let charIndex = 0; charIndex < chunkContent.length; charIndex++) {
+  async streamHtmlContent(streamState, htmlContent, chunkIndex, totalChunks, onUpdate) {
+    // For HTML content, we need to be careful about streaming to maintain valid HTML
+    const isHtmlContent = /<[^>]+>/.test(htmlContent);
+    
+    if (isHtmlContent && this.options.preserveHtmlStructure) {
+      // Stream HTML content in a way that preserves structure
+      await this.streamHtmlStructured(streamState, htmlContent, chunkIndex, totalChunks, onUpdate);
+    } else {
+      // Stream character by character for plain text
+      await this.streamCharacterByCharacter(streamState, htmlContent, chunkIndex, totalChunks, onUpdate);
+    }
+  }
+
+  /**
+   * Stream HTML content while maintaining valid structure
+   * @private
+   */
+  async streamHtmlStructured(streamState, htmlContent, chunkIndex, totalChunks, onUpdate) {
+    let currentContent = '';
+    let insideTag = false;
+    let currentTag = '';
+    
+    for (let i = 0; i < htmlContent.length; i++) {
       if (!this.activeStreams.has(streamState.id)) break;
       
-      streamState.fullContent += chunkContent[charIndex];
+      const char = htmlContent[i];
+      currentContent += char;
+      
+      // Track if we're inside an HTML tag
+      if (char === '<') {
+        insideTag = true;
+        currentTag = '<';
+      } else if (char === '>' && insideTag) {
+        insideTag = false;
+        currentTag += '>';
+        
+        // Add the complete tag to the stream
+        streamState.fullContent += currentTag;
+        currentTag = '';
+        
+        if (onUpdate) {
+          onUpdate({
+            content: streamState.fullContent,
+            isStreaming: true,
+            progress: (chunkIndex + (i / htmlContent.length)) / totalChunks,
+            chunkIndex,
+            totalChunks,
+            charIndex: i,
+            chunkLength: htmlContent.length
+          });
+        }
+        
+        await this.delay(this.options.chunkDelay);
+      } else if (insideTag) {
+        currentTag += char;
+      } else {
+        // Regular character outside of tags
+        streamState.fullContent += char;
+        
+        if (onUpdate) {
+          onUpdate({
+            content: streamState.fullContent,
+            isStreaming: true,
+            progress: (chunkIndex + (i / htmlContent.length)) / totalChunks,
+            chunkIndex,
+            totalChunks,
+            charIndex: i,
+            chunkLength: htmlContent.length
+          });
+        }
+        
+        await this.delay(this.options.chunkDelay);
+      }
+    }
+  }
+
+  /**
+   * Stream content character by character
+   * @private
+   */
+  async streamCharacterByCharacter(streamState, content, chunkIndex, totalChunks, onUpdate) {
+    for (let charIndex = 0; charIndex < content.length; charIndex++) {
+      if (!this.activeStreams.has(streamState.id)) break;
+      
+      streamState.fullContent += content[charIndex];
       
       if (onUpdate) {
         onUpdate({
           content: streamState.fullContent,
           isStreaming: true,
-          progress: (chunkIndex + (charIndex / chunkContent.length)) / totalChunks,
+          progress: (chunkIndex + (charIndex / content.length)) / totalChunks,
           chunkIndex,
           totalChunks,
           charIndex,
-          chunkLength: chunkContent.length
+          chunkLength: content.length
         });
       }
       

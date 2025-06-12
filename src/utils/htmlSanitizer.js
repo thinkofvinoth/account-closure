@@ -8,7 +8,8 @@ const createDOMPurifyConfig = () => ({
     'ul', 'ol', 'li',
     'a', 'img',
     'blockquote', 'code', 'pre',
-    'table', 'thead', 'tbody', 'tr', 'th', 'td'
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'small', 'mark', 'del', 'ins', 'sub', 'sup'
   ],
   ALLOWED_ATTR: [
     'href', 'title', 'alt', 'src', 'width', 'height',

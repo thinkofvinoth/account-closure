@@ -33,37 +33,43 @@ const userProfile = {
   status: 'online'
 };
 
-// Enhanced mock responses with HTML and markdown content
+// Enhanced mock responses with HTML and markdown content including <p> tags
 const MOCK_STREAMING_RESPONSES = [
   [
-    "Let me help you with that question.",
-    "I'm processing your request and gathering relevant information.",
-    "Based on my analysis, here are the **key points** you should consider:",
-    "• First important point\n• Second consideration\n• Third aspect to remember"
+    "<p>Let me help you with that question.</p>",
+    "<p>I'm processing your request and gathering relevant information.</p>",
+    "<p>Based on my analysis, here are the <strong>key points</strong> you should consider:</p>",
+    "<ul><li>First important point</li><li>Second consideration</li><li>Third aspect to remember</li></ul>"
   ],
   [
-    "That's an interesting question about <strong>HTML content processing</strong>.",
-    "Let me demonstrate different content types:",
-    "**Markdown formatting** works seamlessly with *italic* and `code` elements.",
-    "Here's a [helpful link](https://example.com) for more information."
+    "<p>That's an interesting question about <strong>HTML content processing</strong>.</p>",
+    "<p>Let me demonstrate different content types:</p>",
+    "<p><strong>Markdown formatting</strong> works seamlessly with <em>italic</em> and <code>code</code> elements.</p>",
+    "<p>Here's a <a href='https://example.com' target='_blank'>helpful link</a> for more information.</p>"
   ],
   [
-    "I can process various content formats:",
-    "### HTML Elements\n- **Bold text**\n- *Italic text*\n- `Code snippets`",
-    "> This is a blockquote example\n> with multiple lines",
-    "All content is **sanitized** for security while preserving formatting."
+    "<p>I can process various content formats:</p>",
+    "<h3>HTML Elements</h3><ul><li><strong>Bold text</strong></li><li><em>Italic text</em></li><li><code>Code snippets</code></li></ul>",
+    "<blockquote><p>This is a blockquote example</p><p>with multiple paragraphs</p></blockquote>",
+    "<p>All content is <strong>sanitized</strong> for security while preserving formatting.</p>"
   ],
   [
-    "Security is a top priority in content processing.",
-    "All HTML content goes through <em>sanitization</em> to prevent XSS attacks.",
-    "**Supported elements include:**\n1. Text formatting\n2. Lists and links\n3. Code blocks\n4. Blockquotes",
-    "Dangerous elements like `<script>` tags are automatically removed."
+    "<p>Security is a top priority in content processing.</p>",
+    "<p>All HTML content goes through <em>sanitization</em> to prevent XSS attacks.</p>",
+    "<p><strong>Supported elements include:</strong></p><ol><li>Text formatting</li><li>Lists and links</li><li>Code blocks</li><li>Blockquotes</li></ol>",
+    "<p>Dangerous elements like <code>&lt;script&gt;</code> tags are automatically removed.</p>"
   ],
   [
-    "Let me show you **interactive content** capabilities:",
-    "```javascript\nconst greeting = 'Hello World!';\nconsole.log(greeting);\n```",
-    "The system supports:\n• Real-time streaming\n• HTML sanitization\n• Markdown conversion\n• Error handling",
-    "All while maintaining **accessibility** and **performance**."
+    "<p>Let me show you <strong>interactive content</strong> capabilities:</p>",
+    "<pre><code>const greeting = 'Hello World!';\nconsole.log(greeting);</code></pre>",
+    "<p>The system supports:</p><ul><li>Real-time streaming</li><li>HTML sanitization</li><li>Markdown conversion</li><li>Error handling</li></ul>",
+    "<p>All while maintaining <strong>accessibility</strong> and <strong>performance</strong>.</p>"
+  ],
+  [
+    "<p>Here's an example with <strong>mixed HTML elements</strong>:</p>",
+    "<p>You can use <em>emphasis</em>, <strong>strong text</strong>, and even <mark>highlighted content</mark>.</p>",
+    "<p>Mathematical expressions: H<sub>2</sub>O and E=mc<sup>2</sup></p>",
+    "<p><small>This is small text</small> and this is <del>deleted text</del> with <ins>inserted text</ins>.</p>"
   ]
 ];
 
