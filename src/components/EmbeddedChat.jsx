@@ -52,7 +52,6 @@ export const EmbeddedChat = ({
 }) => {
   const [isOpen, setIsOpen] = useState(isEmbedded);
   const [messages, setMessages] = useState(initialMessages);
-  const [isLoading, setIsLoading] = useState(false);
   const { isDarkMode } = useThemeStore();
 
   const handleSendMessage = async (content) => {
@@ -78,7 +77,6 @@ export const EmbeddedChat = ({
     // Check if external handler is provided
     if (onSendMessage) {
       try {
-        setIsLoading(true);
         const response = await onSendMessage(content);
         
         // Check if response contains HTML
@@ -109,7 +107,6 @@ export const EmbeddedChat = ({
           };
 
           setMessages((prev) => [...prev, streamingMessage]);
-          setIsLoading(false);
 
           // Start streaming the HTML response
           await streamingHandler.startStreaming(
@@ -185,11 +182,9 @@ export const EmbeddedChat = ({
           };
           
           setMessages((prev) => [...prev, botResponse]);
-          setIsLoading(false);
         }
       } catch (error) {
         console.error('Error getting response:', error);
-        setIsLoading(false);
       }
     } else {
       // Use internal streaming handler with HTML support
@@ -291,7 +286,6 @@ export const EmbeddedChat = ({
       <ChatContainer
         messages={messages}
         onSendMessage={handleSendMessage}
-        isLoading={isLoading}
       />
     </div>
   );
@@ -308,7 +302,7 @@ export const EmbeddedChat = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={`fixed ${positionClasses[position]} z-50 w-[380px] sm:w-[440px]`}
+            className={`fixed ${positionClasses[position]} z-50 w-[40vw] min-w-[400px] max-w-[600px]`}
           >
             <ChatWindow />
           </motion.div>

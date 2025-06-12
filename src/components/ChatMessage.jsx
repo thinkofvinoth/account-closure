@@ -8,15 +8,15 @@ import { StreamingMessage } from './StreamingMessage';
 
 const MessageSkeleton = () => (
   <div className="flex gap-4">
-    <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+    <div className="relative h-10 w-10 rounded-full bg-[#155c93] flex items-center justify-center">
       <div className="absolute inset-0 flex items-center justify-center">
-        <Spinner size="small" className="border-dark-accent/50" />
+        <Spinner size="small" className="border-white/50" />
       </div>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 1.5, repeat: Infinity }}
-        className="h-6 w-6 text-gray-400 dark:text-gray-500"
+        className="h-6 w-6 text-white"
       >
         <Bot className="h-6 w-6" />
       </motion.div>
@@ -51,7 +51,7 @@ const Avatar = ({ sender, size = 'default' }) => {
     <div className={cn(
       "flex items-center justify-center rounded-full",
       sender.id === 'bot' 
-        ? "bg-gradient-to-br from-indigo-500 to-purple-500" 
+        ? "bg-[#155c93]" 
         : "bg-gradient-to-br from-pink-500 to-rose-500",
       sizeClasses[size]
     )}>
@@ -152,15 +152,15 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
           className={cn(
             'rounded-2xl px-4 py-2.5',
             isBot
-              ? 'rounded-bl-sm bg-white/10 dark:bg-gray-800/50 backdrop-blur-md border border-white/10 dark:border-white/5'
+              ? 'rounded-bl-sm bg-[#155c93]/10 dark:bg-[#155c93]/20 backdrop-blur-md border border-[#155c93]/20 dark:border-[#155c93]/30'
               : 'rounded-br-sm bg-gradient-to-br from-indigo-500 to-purple-500'
           )}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className={`text-sm font-medium ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
+            <span className={`text-sm font-medium ${isBot ? 'text-[#155c93] dark:text-[#155c93]' : 'text-white'}`}>
               {message.sender.name}
             </span>
-            <button className={`p-1 rounded-full ${isBot ? 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            <button className={`p-1 rounded-full ${isBot ? 'text-[#155c93]/70 hover:bg-[#155c93]/10 dark:text-[#155c93] dark:hover:bg-[#155c93]/20' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>

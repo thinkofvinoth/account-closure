@@ -61,15 +61,15 @@ export const StreamingMessage = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-blue-50/50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800/50"
+      className="bg-[#155c93]/10 dark:bg-[#155c93]/20 rounded-xl p-4 border border-[#155c93]/20 dark:border-[#155c93]/30"
     >
       {/* Header with status */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
           {isStreaming ? (
             <>
-              <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
-              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+              <Loader2 className="h-4 w-4 text-[#155c93] animate-spin" />
+              <span className="text-xs text-[#155c93] dark:text-[#155c93] font-medium">
                 Streaming response...
               </span>
             </>
@@ -86,15 +86,15 @@ export const StreamingMessage = ({
         {/* Progress indicator */}
         {isStreaming && progress > 0 && (
           <div className="flex items-center space-x-2">
-            <div className="w-16 h-1 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden">
+            <div className="w-16 h-1 bg-[#155c93]/20 dark:bg-[#155c93]/30 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress * 100}%` }}
                 transition={{ duration: 0.3 }}
-                className="h-full bg-blue-500 rounded-full"
+                className="h-full bg-[#155c93] rounded-full"
               />
             </div>
-            <span className="text-xs text-blue-500 font-mono">
+            <span className="text-xs text-[#155c93] font-mono">
               {Math.round(progress * 100)}%
             </span>
           </div>
@@ -104,9 +104,9 @@ export const StreamingMessage = ({
       {/* Content area */}
       <div 
         ref={contentRef}
-        className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-300 dark:scrollbar-thumb-blue-600"
+        className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-[#155c93]/30 dark:scrollbar-thumb-[#155c93]/50"
       >
-        <div className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed space-y-3">
+        <div className="text-sm text-[#155c93] dark:text-[#155c93] leading-relaxed space-y-3">
           {lines.map((line, index) => (
             <motion.div
               key={index}
@@ -123,7 +123,7 @@ export const StreamingMessage = ({
             <motion.span
               animate={{ opacity: [1, 0.3, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
-              className="inline-block w-2 h-4 bg-blue-500 ml-1 rounded-sm"
+              className="inline-block w-2 h-4 bg-[#155c93] ml-1 rounded-sm"
               aria-label="Typing indicator"
             />
           )}
