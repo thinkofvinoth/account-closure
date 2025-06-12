@@ -163,18 +163,7 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>
-          
-          {isBot && showTypewriter ? (
-            <div className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
-              <TypewriterText 
-                text={message.content} 
-                speed={30}
-                onComplete={handleTypewriterComplete}
-              />
-            </div>
-          ) : (
-            <MessageContent content={message.content} isBot={isBot} />
-          )}
+  
                       <MessageContent content={message.content} isBot={isBot} />
 
         </div>
