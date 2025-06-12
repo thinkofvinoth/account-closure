@@ -57,7 +57,7 @@ const MOCK_STREAMING_RESPONSES = [
     "<p>Security is a top priority in content processing.</p>",
     "<p>All HTML content goes through <em>sanitization</em> to prevent XSS attacks.</p>",
     "<p><strong>Supported elements include:</strong></p><ol><li>Text formatting</li><li>Lists and links</li><li>Code blocks</li><li>Blockquotes</li></ol>",
-    "<p>Dangerous elements like <code>&lt;script&gt;</code> tags are automatically removed.</p>"
+    "<p>Dangerous elements like <code><script></code> tags are automatically removed.</p>"
   ],
   [
     "<p>Let me show you <strong>interactive content</strong> capabilities:</p>",
@@ -73,24 +73,15 @@ const MOCK_STREAMING_RESPONSES = [
   ]
 ];
 
-// Enhanced embedded chat responses with HTML
+// Enhanced embedded chat responses with HTML - now properly formatted for streaming
 const EMBEDDED_CHAT_RESPONSES = [
-  [
-    "<p>Hello from the embedded chat!</p>",
-    "<p>I support the same <strong>HTML streaming capabilities</strong> as the main chat.</p>",
-    "<p>Try asking me anything!</p>"
-  ],
-  [
-    "<p>Thanks for using the embedded assistant!</p>",
-    "<p>I can help with:</p>",
-    "<ul><li>Quick questions</li><li>Information lookup</li><li>General assistance</li></ul>",
-    "<p><em>All with real-time HTML streaming!</em></p>"
-  ],
-  [
-    "<p>I received your message and I'm processing it.</p>",
-    "<blockquote><p>This embedded chat has the same advanced features as the main interface.</p></blockquote>",
-    "<p>What else can I help you with?</p>"
-  ]
+  "<p>Thanks for using the embedded assistant!</p><p>I can help with:</p><ul><li>Quick questions</li><li>Information lookup</li><li>General assistance</li></ul><p><em>All with real-time HTML streaming!</em></p>",
+  
+  "<p>Hello from the embedded chat!</p><p>I support the same <strong>HTML streaming capabilities</strong> as the main chat.</p><p>Try asking me anything!</p>",
+  
+  "<p>I received your message and I'm processing it.</p><blockquote><p>This embedded chat has the same advanced features as the main interface.</p></blockquote><p>What else can I help you with?</p>",
+  
+  "<p>Great to hear from you!</p><p>This embedded assistant includes:</p><ol><li><strong>HTML streaming</strong></li><li><em>Typewriter effects</em></li><li><code>Loading indicators</code></li></ol><p>How can I assist you today?</p>"
 ];
 
 function App() {
@@ -198,9 +189,9 @@ function App() {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Return HTML response for embedded chat
+    // Return HTML response for embedded chat streaming
     const randomResponse = EMBEDDED_CHAT_RESPONSES[Math.floor(Math.random() * EMBEDDED_CHAT_RESPONSES.length)];
-    return randomResponse.join('<br><br>');
+    return randomResponse;
   };
 
   return (

@@ -81,28 +81,114 @@ export const EmbeddedChat = ({
         setIsLoading(true);
         const response = await onSendMessage(content);
         
-        // Create bot response with the external response
-        const botResponse = {
-          id: (Date.now() + 1).toString(),
-          content: response,
-          sender: {
-            id: 'bot',
-            name: title,
-            avatar: '',
-            status: 'online'
-          },
-          timestamp: new Date(),
-          read: true,
-          reactions: [],
-          attachments: [],
-          edited: false,
-          isHtml: false,
-        };
+        // Check if response contains HTML
+        const isHtmlResponse = /<[^>]+>/.test(response);
         
-        setMessages((prev) => [...prev, botResponse]);
+        if (isHtmlResponse) {
+          // Use streaming handler for HTML responses
+          const messageId = `bot-${Date.now()}`;
+          
+          // Add initial streaming message
+          const streamingMessage = {
+            id: messageId,
+            content: '',
+            streamingContent: '',
+            isStreaming: true,
+            sender: {
+              id: 'bot',
+              name: title,
+              avatar: '',
+              status: 'online'
+            },
+            timestamp: new Date(),
+            read: true,
+            reactions: [],
+            attachments: [],
+            edited: false,
+            progress: 0,
+          };
+
+          setMessages((prev) => [...prev, streamingMessage]);
+          setIsLoading(false);
+
+          // Start streaming the HTML response
+          await streamingHandler.startStreaming(
+            messageId,
+            [response], // Wrap single response in array
+            // onUpdate callback
+            (updateData) => {
+              setMessages((prev) => 
+                prev.map(msg => 
+                  msg.id === messageId 
+                    ? {
+                        ...msg,
+                        streamingContent: updateData.content,
+                        progress: updateData.progress,
+                        isStreaming: updateData.isStreaming
+                      }
+                    : msg
+                )
+              );
+            },
+            // onComplete callback
+            (completeData) => {
+              setMessages((prev) => 
+                prev.map(msg => 
+                  msg.id === messageId 
+                    ? {
+                        ...msg,
+                        content: completeData.content,
+                        originalContent: completeData.originalContent,
+                        isStreaming: false,
+                        streamingContent: undefined,
+                        isHtml: completeData.isHtml,
+                        type: completeData.type,
+                        isSafe: completeData.isSafe
+                      }
+                    : msg
+                )
+              );
+            },
+            // onError callback
+            (error) => {
+              setMessages((prev) => 
+                prev.map(msg => 
+                  msg.id === messageId 
+                    ? {
+                        ...msg,
+                        error: error,
+                        isStreaming: false,
+                        onRetry: () => handleSendMessage(content)
+                      }
+                    : msg
+                )
+              );
+            }
+          );
+        } else {
+          // Handle plain text response normally
+          const botResponse = {
+            id: (Date.now() + 1).toString(),
+            content: response,
+            sender: {
+              id: 'bot',
+              name: title,
+              avatar: '',
+              status: 'online'
+            },
+            timestamp: new Date(),
+            read: true,
+            reactions: [],
+            attachments: [],
+            edited: false,
+            isHtml: false,
+          };
+          
+          setMessages((prev) => [...prev, botResponse]);
+          setIsLoading(false);
+        }
       } catch (error) {
         console.error('Error getting response:', error);
-      } finally {
         setIsLoading(false);
       }
     } else {
