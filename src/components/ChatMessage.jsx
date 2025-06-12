@@ -229,18 +229,7 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
                     >
                       Copy to clipboard
                     </button>
-                    <button
-                      onClick={() => handleShare('twitter')}
-                      className="w-full rounded-md px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Share on Twitter
-                    </button>
-                    <button
-                      onClick={() => handleShare('linkedin')}
-                      className="w-full rounded-md px-2 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Share on LinkedIn
-                    </button>
+                    
                   </div>
                 </div>
               )}
