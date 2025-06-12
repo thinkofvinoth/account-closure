@@ -9,7 +9,7 @@ import { streamingHandler } from './utils/streamingHandler';
 const initialMessages = [
   {
     id: '1',
-    content: "Hi! I'm your AI assistant. I can process both plain text and HTML content with streaming responses. How can I help you today?",
+    content: "<p>Hi! I'm your AI assistant with <strong>advanced HTML streaming support</strong>.</p><p>I can process both plain text and HTML content with real-time streaming responses. How can I help you today?</p>",
     sender: {
       id: 'bot',
       name: 'AI Assistant',
@@ -22,7 +22,7 @@ const initialMessages = [
     attachments: [],
     edited: false,
     typewriterComplete: true,
-    isHtml: false,
+    isHtml: true,
   }
 ];
 
@@ -70,6 +70,26 @@ const MOCK_STREAMING_RESPONSES = [
     "<p>You can use <em>emphasis</em>, <strong>strong text</strong>, and even <mark>highlighted content</mark>.</p>",
     "<p>Mathematical expressions: H<sub>2</sub>O and E=mc<sup>2</sup></p>",
     "<p><small>This is small text</small> and this is <del>deleted text</del> with <ins>inserted text</ins>.</p>"
+  ]
+];
+
+// Enhanced embedded chat responses with HTML
+const EMBEDDED_CHAT_RESPONSES = [
+  [
+    "<p>Hello from the embedded chat!</p>",
+    "<p>I support the same <strong>HTML streaming capabilities</strong> as the main chat.</p>",
+    "<p>Try asking me anything!</p>"
+  ],
+  [
+    "<p>Thanks for using the embedded assistant!</p>",
+    "<p>I can help with:</p>",
+    "<ul><li>Quick questions</li><li>Information lookup</li><li>General assistance</li></ul>",
+    "<p><em>All with real-time HTML streaming!</em></p>"
+  ],
+  [
+    "<p>I received your message and I'm processing it.</p>",
+    "<blockquote><p>This embedded chat has the same advanced features as the main interface.</p></blockquote>",
+    "<p>What else can I help you with?</p>"
   ]
 ];
 
@@ -175,8 +195,12 @@ function App() {
   };
 
   const handleEmbeddedChatMessage = async (message) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return `I received your message: "${message}". How can I help you further?`;
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Return HTML response for embedded chat
+    const randomResponse = EMBEDDED_CHAT_RESPONSES[Math.floor(Math.random() * EMBEDDED_CHAT_RESPONSES.length)];
+    return randomResponse.join('<br><br>');
   };
 
   return (
@@ -216,14 +240,30 @@ function App() {
         </div>
       </div>
 
-      {/* Embedded Chat */}
+      {/* Enhanced Embedded Chat with HTML Streaming */}
       <div className="relative z-50">
         <EmbeddedChat
-          initialMessages={initialMessages}
+          initialMessages={[{
+            id: '1',
+            content: "<p>Hi! I'm your <strong>embedded assistant</strong> with HTML streaming support.</p><p>How can I help you today?</p>",
+            sender: {
+              id: 'bot',
+              name: 'Quick Assistant',
+              avatar: '',
+              status: 'online'
+            },
+            timestamp: new Date(),
+            read: true,
+            reactions: [],
+            attachments: [],
+            edited: false,
+            isHtml: true,
+            typewriterComplete: true,
+          }]}
           position="bottom-right"
           buttonIcon={<MessageCircle className="h-6 w-6" />}
           title="Quick Assistant"
-          subtitle="Here to help you 24/7"
+          subtitle="HTML streaming support"
           theme={{
             primaryColor: 'from-dark-accent to-dark-accent2',
             secondaryColor: 'from-dark-accent2 to-dark-accent',
