@@ -175,7 +175,10 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
           ) : (
             <MessageContent content={message.content} isBot={isBot} />
           )}
+                      <MessageContent content={message.content} isBot={isBot} />
+
         </div>
+            <MessageContent content={message.content} isBot={isBot} />
 
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
