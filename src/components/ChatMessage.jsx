@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { cn } from '../utils/cn';
 import { Spinner } from './Spinner';
 import { TypewriterText } from './TypewriterText';
+import { StreamingMessage } from './StreamingMessage';
 
 const MessageSkeleton = () => (
   <div className="flex gap-4">
@@ -97,6 +98,26 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
     setTypewriterComplete(true);
     setShowTypewriter(false);
   };
+
+  // Show streaming message if it's a streaming message
+  if (message.isStreaming || message.streamingContent) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex gap-4 justify-start"
+      >
+        <Avatar sender={message.sender} />
+        <div className="flex flex-col gap-2 max-w-[80%]">
+          <StreamingMessage 
+            message={message.streamingContent || ''} 
+            isStreaming={message.isStreaming}
+          />
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
