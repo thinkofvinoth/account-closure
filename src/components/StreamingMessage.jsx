@@ -3,6 +3,13 @@ import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 export const StreamingMessage = ({ message, isStreaming }) => {
+  // Convert HTML break tags to proper line breaks for display
+  const formatMessage = (text) => {
+    return text.split(/<br\s*\/?>/gi).filter(line => line.trim() !== '');
+  };
+
+  const lines = formatMessage(message);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -18,10 +25,13 @@ export const StreamingMessage = ({ message, isStreaming }) => {
           )}
         </div>
         <div className="flex-1">
-          <div 
-            className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: message }}
-          />
+          <div className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed space-y-3">
+            {lines.map((line, index) => (
+              <div key={index}>
+                {line.trim()}
+              </div>
+            ))}
+          </div>
           {isStreaming && (
             <motion.span
               animate={{ opacity: [1, 0.3, 1] }}

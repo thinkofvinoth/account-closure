@@ -65,6 +65,21 @@ const Avatar = ({ sender, size = 'default' }) => {
   );
 };
 
+const MessageContent = ({ content, isBot }) => {
+  // Split content by line breaks and render each line separately
+  const lines = content.split('\n').filter(line => line.trim() !== '');
+  
+  return (
+    <div className="space-y-3">
+      {lines.map((line, index) => (
+        <div key={index} className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
+          {line.trim()}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const ChatMessage = ({ message, isBot, isLoading }) => {
   const [reaction, setReaction] = useState(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -148,17 +163,18 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>
-          <div className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
-            {isBot && showTypewriter ? (
+          
+          {isBot && showTypewriter ? (
+            <div className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
               <TypewriterText 
                 text={message.content} 
                 speed={30}
                 onComplete={handleTypewriterComplete}
               />
-            ) : (
-              message.content
-            )}
-          </div>
+            </div>
+          ) : (
+            <MessageContent content={message.content} isBot={isBot} />
+          )}
         </div>
 
         <div className="flex items-center justify-between px-1">
