@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { StreamingMessage } from './StreamingMessage';
 
 const CLOSURE_STEPS = [
   { id: 'verification', title: 'Account Verification', icon: User },
@@ -54,6 +55,53 @@ const MOCK_ACCOUNTS = {
     accountType: 'Savings Account',
     balance: '$0.00'
   }
+};
+
+// Mock streaming responses for different steps
+const STREAMING_RESPONSES = {
+  verification: [
+    "Thank you for providing your account number.",
+    "I'm now verifying your account details with our secure system.",
+    "This process ensures we have the correct account information before proceeding.",
+    "Verification complete! Your account has been successfully identified."
+  ],
+  statusCheck: [
+    "Now performing a comprehensive status check on your account.",
+    "Checking for any outstanding payments or pending transactions.",
+    "Reviewing active recurring payments and subscriptions.",
+    "Verifying account balance and recent activity.",
+    "Status check complete! Your account is eligible for closure."
+  ],
+  statusIssues: [
+    "I've completed the account review and found some items that need attention.",
+    "These issues must be resolved before we can proceed with the closure process.",
+    "I can help you understand each issue and provide guidance on resolution.",
+    "Would you like assistance resolving these items, or would you prefer to handle them separately?"
+  ],
+  reasonCollection: [
+    "Thank you for selecting your closure reason.",
+    "This feedback helps us improve our services for future customers.",
+    "Your input is valuable and will be shared with our product team.",
+    "Now let's proceed to the final confirmation step."
+  ],
+  finalConfirmation: [
+    "We're now at the final confirmation stage.",
+    "Please take a moment to review the important points listed above.",
+    "Remember that account closure is permanent and cannot be undone.",
+    "Once you type 'CONFIRM', we'll immediately begin processing your closure request."
+  ],
+  processing: [
+    "Your closure request has been received and is now being processed.",
+    "Our secure systems are handling your request with the highest priority.",
+    "All account data is being properly archived according to regulatory requirements.",
+    "Final documentation is being generated for your records."
+  ],
+  completion: [
+    "Congratulations! Your account closure has been completed successfully.",
+    "All processes have been finalized and your account is now officially closed.",
+    "A confirmation email with all details has been sent to your registered email address.",
+    "Thank you for being our valued customer. We wish you all the best!"
+  ]
 };
 
 const ProgressBar = ({ currentStep, completedSteps }) => {
@@ -134,7 +182,7 @@ const ProgressBar = ({ currentStep, completedSteps }) => {
 };
 
 export const AccountClosureChatbot = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState('verification'); // Start directly with verification
+  const [currentStep, setCurrentStep] = useState('verification');
   const [completedSteps, setCompletedSteps] = useState([]);
   const [accountNumber, setAccountNumber] = useState('');
   const [accountData, setAccountData] = useState(null);
@@ -144,6 +192,9 @@ export const AccountClosureChatbot = ({ onComplete }) => {
   const [error, setError] = useState('');
   const [closureId, setClosureId] = useState('');
   const [processingStep, setProcessingStep] = useState(0);
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [showStreamingMessage, setShowStreamingMessage] = useState(false);
 
   const formatAccountNumber = (value) => {
     const digits = value.replace(/\D/g, '');
@@ -156,6 +207,48 @@ export const AccountClosureChatbot = ({ onComplete }) => {
     return pattern.test(number);
   };
 
+  const simulateStreamingResponse = async (responseKey, onComplete) => {
+    const responses = STREAMING_RESPONSES[responseKey];
+    if (!responses) return;
+
+    setIsStreaming(true);
+    setShowStreamingMessage(true);
+    setStreamingMessage('');
+
+    let fullMessage = '';
+    
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      
+      // Add break tag between responses (except for the first one)
+      if (i > 0) {
+        fullMessage += '<br /><br />';
+        setStreamingMessage(fullMessage);
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      // Stream each character of the current response
+      for (let j = 0; j < response.length; j++) {
+        fullMessage += response[j];
+        setStreamingMessage(fullMessage);
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+      
+      // Pause between responses
+      if (i < responses.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+    }
+
+    setIsStreaming(false);
+    
+    // Keep the message visible for a moment before calling onComplete
+    setTimeout(() => {
+      setShowStreamingMessage(false);
+      if (onComplete) onComplete();
+    }, 1500);
+  };
+
   const handleAccountNumberSubmit = async () => {
     if (!validateAccountNumber(accountNumber)) {
       setError("I notice the format isn't quite right. Your account number should look like: 12-3456-7890-12. Please try again.");
@@ -164,65 +257,85 @@ export const AccountClosureChatbot = ({ onComplete }) => {
 
     setError('');
     setIsProcessing(true);
-    setCurrentStep('status-check');
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Start streaming response for verification
+    await simulateStreamingResponse('verification', async () => {
+      setCurrentStep('status-check');
 
-    const account = MOCK_ACCOUNTS[accountNumber];
-    if (!account) {
-      setError('Account not found. Please check your account number and try again.');
-      setIsProcessing(false);
-      setCurrentStep('verification');
-      return;
-    }
+      // Simulate API delay for status check
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setAccountData(account);
-    setCompletedSteps(['verification']);
+      const account = MOCK_ACCOUNTS[accountNumber];
+      if (!account) {
+        setError('Account not found. Please check your account number and try again.');
+        setIsProcessing(false);
+        setCurrentStep('verification');
+        return;
+      }
 
-    // Check account status
-    if (account.status !== 'active' || account.hasOutstandingPayments || account.hasRecurringPayments) {
-      setCurrentStep('status-issues');
-    } else {
-      setCurrentStep('reason');
-      setCompletedSteps(['verification', 'status-check']);
-    }
-    
-    setIsProcessing(false);
+      setAccountData(account);
+      setCompletedSteps(['verification']);
+
+      // Stream status check response
+      await simulateStreamingResponse('statusCheck', () => {
+        // Check account status
+        if (account.status !== 'active' || account.hasOutstandingPayments || account.hasRecurringPayments) {
+          simulateStreamingResponse('statusIssues', () => {
+            setCurrentStep('status-issues');
+            setIsProcessing(false);
+          });
+        } else {
+          setCurrentStep('reason');
+          setCompletedSteps(['verification', 'status-check']);
+          setIsProcessing(false);
+        }
+      });
+    });
   };
 
-  const handleReasonSubmit = () => {
+  const handleReasonSubmit = async () => {
     if (!closureReason) {
       setError('Please select a reason for closing your account.');
       return;
     }
     setError('');
-    setCurrentStep('confirmation');
-    setCompletedSteps(['verification', 'status-check', 'reason']);
+    setIsProcessing(true);
+
+    await simulateStreamingResponse('reasonCollection', () => {
+      setCurrentStep('confirmation');
+      setCompletedSteps(['verification', 'status-check', 'reason']);
+      setIsProcessing(false);
+    });
   };
 
   const handleConfirmation = async () => {
-    setCurrentStep('processing');
-    setCompletedSteps(['verification', 'status-check', 'reason', 'confirmation']);
     setIsProcessing(true);
+    
+    await simulateStreamingResponse('finalConfirmation', async () => {
+      setCurrentStep('processing');
+      setCompletedSteps(['verification', 'status-check', 'reason', 'confirmation']);
 
-    const processingSteps = [
-      'Verifying final details',
-      'Processing closure',
-      'Generating documentation',
-      'Creating confirmation'
-    ];
+      const processingSteps = [
+        'Verifying final details',
+        'Processing closure',
+        'Generating documentation',
+        'Creating confirmation'
+      ];
 
-    for (let i = 0; i < processingSteps.length; i++) {
-      setProcessingStep(i);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-    }
+      for (let i = 0; i < processingSteps.length; i++) {
+        setProcessingStep(i);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
 
-    const id = `CSW-${Math.floor(Math.random() * 9000) + 1000}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-    setClosureId(id);
-    setCurrentStep('completion');
-    setCompletedSteps(['verification', 'status-check', 'reason', 'confirmation', 'processing', 'completion']);
-    setIsProcessing(false);
+      const id = `CSW-${Math.floor(Math.random() * 9000) + 1000}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+      setClosureId(id);
+
+      await simulateStreamingResponse('completion', () => {
+        setCurrentStep('completion');
+        setCompletedSteps(['verification', 'status-check', 'reason', 'confirmation', 'processing', 'completion']);
+        setIsProcessing(false);
+      });
+    });
   };
 
   const renderAccountVerification = () => (
@@ -232,6 +345,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       className="space-y-4"
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
+      
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
       
       <div className="text-center mb-4">
         <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-xl inline-block mb-4">
@@ -286,6 +406,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
         <button
           onClick={() => onComplete?.()}
           className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-xl hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 font-medium"
+          disabled={isProcessing}
         >
           Cancel
         </button>
@@ -297,7 +418,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
           {isProcessing ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Checking account status...</span>
+              <span>Processing...</span>
             </>
           ) : (
             <>
@@ -317,6 +438,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       className="space-y-4"
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
+      
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
       
       <div className="text-center mb-4">
         <div className="p-3 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-xl inline-block mb-4">
@@ -390,6 +518,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
       
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
+      
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
           Closure Reason
@@ -422,6 +557,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
               checked={closureReason === option.value}
               onChange={(e) => setClosureReason(e.target.value)}
               className="text-blue-500"
+              disabled={isProcessing}
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
           </label>
@@ -440,6 +576,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
             placeholder="Please specify your reason..."
             className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800/50 focus:outline-none transition-all resize-none"
             rows={3}
+            disabled={isProcessing}
           />
         </motion.div>
       )}
@@ -457,11 +594,20 @@ export const AccountClosureChatbot = ({ onComplete }) => {
 
       <button
         onClick={handleReasonSubmit}
-        disabled={!closureReason || (closureReason === 'other' && !customReason.trim())}
+        disabled={!closureReason || (closureReason === 'other' && !customReason.trim()) || isProcessing}
         className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 font-medium"
       >
-        <span>Continue</span>
-        <ArrowRight className="h-4 w-4" />
+        {isProcessing ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Processing...</span>
+          </>
+        ) : (
+          <>
+            <span>Continue</span>
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </button>
     </motion.div>
   );
@@ -473,6 +619,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       className="space-y-4"
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
+      
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
       
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
@@ -516,6 +669,7 @@ export const AccountClosureChatbot = ({ onComplete }) => {
               handleConfirmation();
             }
           }}
+          disabled={isProcessing}
         />
       </div>
     </motion.div>
@@ -528,6 +682,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       className="space-y-4"
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
+      
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
       
       <div className="text-center mb-4">
         <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 rounded-xl inline-block mb-4">
@@ -587,6 +748,13 @@ export const AccountClosureChatbot = ({ onComplete }) => {
       className="space-y-4"
     >
       <ProgressBar currentStep={currentStep} completedSteps={completedSteps} />
+      
+      {showStreamingMessage && (
+        <StreamingMessage 
+          message={streamingMessage}
+          isStreaming={isStreaming}
+        />
+      )}
       
       <div className="text-center mb-4">
         <motion.div
