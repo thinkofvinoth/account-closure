@@ -1,5 +1,5 @@
-import { htmlSanitizer } from './htmlSanitizer';
-import { markdownProcessor } from './markdownProcessor';
+import { htmlSanitizer } from './htmlSanitizer.js';
+import { markdownProcessor } from './markdownProcessor.js';
 
 /**
  * Content type detection and processing
