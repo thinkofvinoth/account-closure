@@ -4,11 +4,12 @@ import { EmbeddedChat } from './components/EmbeddedChat';
 import { Header } from './components/Header';
 import { ChatContainer } from './components/ChatContainer';
 import { useThemeStore } from './store/useThemeStore';
+import { streamingHandler } from './utils/streamingHandler';
 
 const initialMessages = [
   {
     id: '1',
-    content: "Hi! I'm your AI assistant. How can I help you today?",
+    content: "Hi! I'm your AI assistant. I can process both plain text and HTML content with streaming responses. How can I help you today?",
     sender: {
       id: 'bot',
       name: 'AI Assistant',
@@ -20,7 +21,8 @@ const initialMessages = [
     reactions: [],
     attachments: [],
     edited: false,
-    typewriterComplete: true, // Skip typewriter for initial message
+    typewriterComplete: true,
+    isHtml: false,
   }
 ];
 
@@ -31,128 +33,43 @@ const userProfile = {
   status: 'online'
 };
 
-// Mock streaming responses
+// Enhanced mock responses with HTML and markdown content
 const MOCK_STREAMING_RESPONSES = [
   [
     "Let me help you with that question.",
     "I'm processing your request and gathering relevant information.",
-    "Based on my analysis, here's what I found.",
-    "I hope this information is helpful to you!"
+    "Based on my analysis, here are the **key points** you should consider:",
+    "• First important point\n• Second consideration\n• Third aspect to remember"
   ],
   [
-    "That's an interesting question you've asked.",
-    "Let me break this down into manageable parts.",
-    "Here are the key points you should consider.",
-    "Feel free to ask if you need more clarification!"
+    "That's an interesting question about <strong>HTML content processing</strong>.",
+    "Let me demonstrate different content types:",
+    "**Markdown formatting** works seamlessly with *italic* and `code` elements.",
+    "Here's a [helpful link](https://example.com) for more information."
   ],
   [
-    "I understand what you're looking for.",
-    "Let me provide you with a comprehensive answer.",
-    "This topic has several important aspects to consider.",
-    "I'm here if you have any follow-up questions!"
+    "I can process various content formats:",
+    "### HTML Elements\n- **Bold text**\n- *Italic text*\n- `Code snippets`",
+    "> This is a blockquote example\n> with multiple lines",
+    "All content is **sanitized** for security while preserving formatting."
   ],
   [
-    "Thank you for your question.",
-    "I'll walk you through this step by step.",
-    "Here's the information you requested.",
-    "Let me know if you need additional details!"
+    "Security is a top priority in content processing.",
+    "All HTML content goes through <em>sanitization</em> to prevent XSS attacks.",
+    "**Supported elements include:**\n1. Text formatting\n2. Lists and links\n3. Code blocks\n4. Blockquotes",
+    "Dangerous elements like `<script>` tags are automatically removed."
+  ],
+  [
+    "Let me show you **interactive content** capabilities:",
+    "```javascript\nconst greeting = 'Hello World!';\nconsole.log(greeting);\n```",
+    "The system supports:\n• Real-time streaming\n• HTML sanitization\n• Markdown conversion\n• Error handling",
+    "All while maintaining **accessibility** and **performance**."
   ]
 ];
 
 function App() {
   const { isDarkMode } = useThemeStore();
   const [mainMessages, setMainMessages] = useState(initialMessages);
-
-  const simulateStreamingResponse = async (responses) => {
-    return new Promise((resolve) => {
-      const streamingMessageId = `streaming-${Date.now()}`;
-      
-      // Add initial streaming message
-      const streamingMessage = {
-        id: streamingMessageId,
-        content: '',
-        streamingContent: '',
-        isStreaming: true,
-        sender: {
-          id: 'bot',
-          name: 'AI Assistant',
-          avatar: '',
-          status: 'online'
-        },
-        timestamp: new Date(),
-        read: true,
-        reactions: [],
-        attachments: [],
-        edited: false,
-      };
-
-      setMainMessages((prev) => [...prev, streamingMessage]);
-
-      let fullContent = '';
-      let currentResponseIndex = 0;
-
-      const streamNextResponse = () => {
-        if (currentResponseIndex >= responses.length) {
-          // Streaming complete - convert to regular message
-          setMainMessages((prev) => 
-            prev.map(msg => 
-              msg.id === streamingMessageId 
-                ? {
-                    ...msg,
-                    content: fullContent.replace(/<br\s*\/?>/gi, '\n'),
-                    isStreaming: false,
-                    streamingContent: undefined,
-                    typewriterComplete: false
-                  }
-                : msg
-            )
-          );
-          resolve();
-          return;
-        }
-
-        const currentResponse = responses[currentResponseIndex];
-        
-        // Add break tag if not the first response
-        if (currentResponseIndex > 0) {
-          fullContent += '<br /><br />';
-          setMainMessages((prev) => 
-            prev.map(msg => 
-              msg.id === streamingMessageId 
-                ? { ...msg, streamingContent: fullContent }
-                : msg
-            )
-          );
-        }
-
-        // Stream each character of the current response
-        let charIndex = 0;
-        const streamChars = () => {
-          if (charIndex < currentResponse.length) {
-            fullContent += currentResponse[charIndex];
-            setMainMessages((prev) => 
-              prev.map(msg => 
-                msg.id === streamingMessageId 
-                  ? { ...msg, streamingContent: fullContent }
-                  : msg
-              )
-            );
-            charIndex++;
-            setTimeout(streamChars, 50); // 50ms delay between characters
-          } else {
-            // Move to next response after a pause
-            currentResponseIndex++;
-            setTimeout(streamNextResponse, 1000); // 1s pause between responses
-          }
-        };
-
-        streamChars();
-      };
-
-      // Start streaming after a short delay
-      setTimeout(streamNextResponse, 500);
-    });
-  };
 
   const handleMainChatMessage = async (content) => {
     const newMessage = {
@@ -164,15 +81,91 @@ function App() {
       reactions: [],
       attachments: [],
       edited: false,
+      isHtml: false,
     };
 
     setMainMessages((prev) => [...prev, newMessage]);
 
     // Select random streaming response
     const randomResponse = MOCK_STREAMING_RESPONSES[Math.floor(Math.random() * MOCK_STREAMING_RESPONSES.length)];
+    const messageId = `bot-${Date.now()}`;
     
-    // Simulate streaming response
-    await simulateStreamingResponse(randomResponse);
+    // Add initial streaming message
+    const streamingMessage = {
+      id: messageId,
+      content: '',
+      streamingContent: '',
+      isStreaming: true,
+      sender: {
+        id: 'bot',
+        name: 'AI Assistant',
+        avatar: '',
+        status: 'online'
+      },
+      timestamp: new Date(),
+      read: true,
+      reactions: [],
+      attachments: [],
+      edited: false,
+      progress: 0,
+    };
+
+    setMainMessages((prev) => [...prev, streamingMessage]);
+
+    // Start streaming with the advanced handler
+    await streamingHandler.startStreaming(
+      messageId,
+      randomResponse,
+      // onUpdate callback
+      (updateData) => {
+        setMainMessages((prev) => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? {
+                  ...msg,
+                  streamingContent: updateData.content,
+                  progress: updateData.progress,
+                  isStreaming: updateData.isStreaming
+                }
+              : msg
+          )
+        );
+      },
+      // onComplete callback
+      (completeData) => {
+        setMainMessages((prev) => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? {
+                  ...msg,
+                  content: completeData.content,
+                  originalContent: completeData.originalContent,
+                  isStreaming: false,
+                  streamingContent: undefined,
+                  isHtml: completeData.isHtml,
+                  type: completeData.type,
+                  isSafe: completeData.isSafe
+                }
+              : msg
+          )
+        );
+      },
+      // onError callback
+      (error) => {
+        setMainMessages((prev) => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? {
+                  ...msg,
+                  error: error,
+                  isStreaming: false,
+                  onRetry: () => handleMainChatMessage(content)
+                }
+              : msg
+          )
+        );
+      }
+    );
   };
 
   const handleEmbeddedChatMessage = async (message) => {
@@ -193,17 +186,17 @@ function App() {
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-dark-accent via-dark-accent2 to-dark-accent animate-gradient">
-              CSW Genie
+              Advanced Streaming Chat
             </h1>
             <p className={`mt-2 text-lg ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Experience our advanced chat interface with streaming responses
+              Secure HTML & Markdown processing with real-time streaming responses
             </p>
           </div>
 
           <div className={`rounded-2xl backdrop-blur-lg border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white/20'} shadow-2xl overflow-hidden`}>
             <Header
               title="AI Assistant"
-              subtitle="Full-featured chat with streaming responses"
+              subtitle="HTML-aware streaming chat with security"
               theme={{
                 primaryColor: 'from-dark-accent to-dark-accent2',
                 secondaryColor: 'from-dark-accent2 to-dark-accent',

@@ -4,7 +4,6 @@ import { Bot, ThumbsUp, ThumbsDown, Share2, User, Clock, MoreHorizontal } from '
 import { format } from 'date-fns';
 import { cn } from '../utils/cn';
 import { Spinner } from './Spinner';
-import { TypewriterText } from './TypewriterText';
 import { StreamingMessage } from './StreamingMessage';
 
 const MessageSkeleton = () => (
@@ -65,7 +64,16 @@ const Avatar = ({ sender, size = 'default' }) => {
   );
 };
 
-const MessageContent = ({ content, isBot }) => {
+const MessageContent = ({ content, isBot, isHtml = false }) => {
+  if (isHtml) {
+    return (
+      <div 
+        className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  }
+
   // Split content by line breaks and render each line separately
   const lines = content.split('\n').filter(line => line.trim() !== '');
   
@@ -83,8 +91,6 @@ const MessageContent = ({ content, isBot }) => {
 export const ChatMessage = ({ message, isBot, isLoading }) => {
   const [reaction, setReaction] = useState(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [showTypewriter, setShowTypewriter] = useState(isBot && !message.typewriterComplete);
-  const [typewriterComplete, setTypewriterComplete] = useState(message.typewriterComplete || false);
 
   if (isLoading) {
     return <MessageSkeleton />;
@@ -97,21 +103,13 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
   const handleShare = async (method) => {
     switch (method) {
       case 'copy':
-        await navigator.clipboard.writeText(message.content);
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message.content)}`);
-        break;
-      case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${encodeURIComponent(message.content)}`);
+        const textContent = message.isHtml ? 
+          message.originalContent || message.content.replace(/<[^>]*>/g, '') : 
+          message.content;
+        await navigator.clipboard.writeText(textContent);
         break;
     }
     setShowShareMenu(false);
-  };
-
-  const handleTypewriterComplete = () => {
-    setTypewriterComplete(true);
-    setShowTypewriter(false);
   };
 
   // Show streaming message if it's a streaming message
@@ -128,6 +126,9 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
           <StreamingMessage 
             message={message.streamingContent || ''} 
             isStreaming={message.isStreaming}
+            progress={message.progress}
+            error={message.error}
+            onRetry={message.onRetry}
           />
         </div>
       </motion.div>
@@ -163,9 +164,12 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
               <MoreHorizontal className="h-4 w-4" />
             </button>
           </div>
-  
-                      <MessageContent content={message.content} isBot={isBot} />
-
+          
+          <MessageContent 
+            content={message.content} 
+            isBot={isBot} 
+            isHtml={message.isHtml}
+          />
         </div>
 
         <div className="flex items-center justify-between px-1">
@@ -174,6 +178,11 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
             <span className="text-xs text-gray-400 dark:text-gray-500">
               {format(message.timestamp, 'h:mm a')}
             </span>
+            {message.type && (
+              <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                {message.type}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -220,7 +229,6 @@ export const ChatMessage = ({ message, isBot, isLoading }) => {
                     >
                       Copy to clipboard
                     </button>
-                    
                   </div>
                 </div>
               )}
