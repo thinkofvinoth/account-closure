@@ -27,18 +27,18 @@ export const StreamingMessage = ({ message, isStreaming }) => {
         <div className="flex-1">
           <div className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed space-y-3">
             {lines.map((line, index) => (
-              <div key={index}>
+              <div key={index} className="block">
                 {line.trim()}
               </div>
             ))}
+            {isStreaming && (
+              <motion.span
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="inline-block w-2 h-4 bg-blue-500 ml-1"
+              />
+            )}
           </div>
-          {isStreaming && (
-            <motion.span
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="inline-block w-2 h-4 bg-blue-500 ml-1"
-            />
-          )}
         </div>
       </div>
     </motion.div>

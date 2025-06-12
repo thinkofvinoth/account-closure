@@ -72,7 +72,7 @@ const MessageContent = ({ content, isBot }) => {
   return (
     <div className="space-y-3">
       {lines.map((line, index) => (
-        <div key={index} className={`text-[15px] leading-relaxed ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
+        <div key={index} className={`text-[15px] leading-relaxed block ${isBot ? 'text-gray-700 dark:text-gray-200' : 'text-white'}`}>
           {line.trim()}
         </div>
       ))}
